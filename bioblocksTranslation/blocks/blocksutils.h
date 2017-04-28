@@ -29,6 +29,9 @@ public:
     static units::Length getLengthUnits(const std::string & unitsStr) throw(std::invalid_argument);
     static units::Time getTimeUnits(const std::string & unitsStr) throw(std::invalid_argument);
 
+    static void fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT);
+    static void fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT, units::Time & duration);
+
     virtual ~BlocksUtils(){}
 private:
     BlocksUtils(){}

@@ -2,32 +2,137 @@
 
 using json = nlohmann::json;
 
-ContainerManager::ContainerManager(std::shared_ptr<ProtocolGraph> protocolPtr) {
+ContainerManager::ContainerManager(std::shared_ptr<ProtocolGraph> protocolPtr, std::shared_ptr<MathBlocks> mathBlocks) {
     this->protocolPtr = protocolPtr;
+    this->mathBlocks = mathBlocks;
 }
 
 ContainerManager::~ContainerManager() {
 
 }
 
-void ContainerManager::processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     if(!containerObj["block_type"].is_null()) {
         std::string contStr = containerObj["block_type"];
 
+        std::vector<std::string> containerList;
         if (contStr.compare(SINGLE_CONATINER_BLOCK_STR) == 0) {
-            processContainerBlock(containerObj);
+            containerList.push_back(processContainerBlock(containerObj));
         } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
-            processContainerList(containerObj);
+            containerList = processContainerList(containerObj);
         } else {
             throw(std::invalid_argument("ContainerManager::processContainerBlock. Unknow block type: \"" + opStr + "\""));
         }
+        return containerList;
     } else {
         throw(std::invalid_argument("ContainerManager::processContainerBlock. " +
                                     BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
     }
 }
 
-void ContainerManager::processSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    if(!containerObj["block_type"].is_null()) {
+        std::string contStr = containerObj["block_type"];
+
+        VolumeMap volumeList;
+        if (contStr.compare(SINGLE_CONATINER_BLOCK_STR) == 0) {
+            volumeList.insert(extractVolumeSingleContainer(containerObj));
+        } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
+            volumeList = extractVolumeListContainer(containerObj);
+        } else {
+            throw(std::invalid_argument("ContainerManager::extractVolume. Unknow block type: \"" + opStr + "\""));
+        }
+        return volumeList;
+    } else {
+        throw(std::invalid_argument("ContainerManager::extractVolume. " +
+                                    BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
+    }
+}
+
+ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    if(!containerObj["block_type"].is_null()) {
+        std::string contStr = containerObj["block_type"];
+
+        RateMap rateList;
+        if (contStr.compare(SINGLE_CONATINER_BLOCK_STR) == 0) {
+            rateList.insert(extractRateSingleContainer(containerObj));
+        } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
+            rateList = extractRateListContainer(containerObj);
+        } else {
+            throw(std::invalid_argument("ContainerManager::extractRate. Unknow block type: \"" + opStr + "\""));
+        }
+        return rateList;
+    } else {
+        throw(std::invalid_argument("ContainerManager::extractRate. " +
+                                    BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
+    }
+}
+
+std::pair<std::string, ContainerManager::VolumeTuple> ContainerManager::extractVolumeSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName", "volume","unit_volume"}, containerObj);
+
+        std::string name = containerObj["containerName"];
+        units::Volume volumeUnits = BlocksUtils::getVolumeUnits(containerObj["unit_volume"]);
+        std::shared_ptr<MathematicOperable> volume = mathBlocks->translateMathBlock(containerObj["volume"]);
+
+        return std::make_pair(name, std::make_tuple(volume, volumeUnits));
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("ContainerManager::extractVolumeSingleContainer." + std::string(e.what())));
+    }
+}
+
+ContainerManager::VolumeMap ContainerManager::extractVolumeListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
+        json contList = containerObj["containerList"];
+
+        VolumeMap volumeMap;
+        for (json::iterator it = contList.begin(); it != contList.end(); ++it) {
+            VolumeMap localMap = extractVolume(*it);
+            for(const auto & pair : localMap) {
+                volumeMap.insert(pair);
+            }
+        }
+        return volumeMap;
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("ContainerManager::processSingleContainer." + std::string(e.what())));
+    }
+}
+
+std::pair<std::string, ContainerManager::RateTuple> ContainerManager::extractRateSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName", "rate", "rate_volume_units", "rate_time_units"}, containerObj);
+
+        std::string name = containerObj["containerName"];
+        units::Volumetric_Flow rateUnits = ( BlocksUtils::getVolumeUnits(containerObj["rate_volume_units"]) / BlocksUtils::getTimeUnits(containerObj["rate_time_units"]));
+        std::shared_ptr<MathematicOperable> rate = mathBlocks->translateMathBlock(containerObj["rate"]);
+
+        return std::make_pair(name, std::make_tuple(rate, rateUnits));
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("ContainerManager::extractVolumeSingleContainer." + std::string(e.what())));
+    }
+}
+
+ContainerManager::RateMap ContainerManager::extractRateListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
+        json contList = containerObj["containerList"];
+
+        RateMap rateMap;
+        for (json::iterator it = contList.begin(); it != contList.end(); ++it) {
+            RateMap localMap = extractRate(*it);
+            for(const auto & pair : localMap) {
+                rateMap.insert(pair);
+            }
+        }
+        return rateMap;
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("ContainerManager::processSingleContainer." + std::string(e.what())));
+    }
+}
+
+std::string ContainerManager::processSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName","type","destiny"}, containerObj);
 
@@ -42,19 +147,26 @@ void ContainerManager::processSingleContainer(const nlohmann::json & containerOb
                 initialVolume = std::atoi(containerObj["initialVolume"]) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
             }
             protocolPtr->addVContainer(name, std::get<1>(typeTuple),std::get<0>(typeTuple),initialVolume, store);
+
+            return name;
         }
     } catch (std::invalid_argument & e) {
         throw(std::invalid_argument("ContainerManager::processSingleContainer." + std::string(e.what())));
     }
 }
 
-void ContainerManager::processContainerList(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+std::vector<std::string> ContainerManager::processContainerList(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
         json contList = containerObj["containerList"];
+
+        std::vector<std::string> containerList;
         for (json::iterator it = contList.begin(); it != contList.end(); ++it) {
-            processContainerBlock(*it);
+            std::vector<std::string> localList = processContainerBlock(*it);
+            containerList.reserve(containerList.size() + localList.size());
+            containerList.insert(containerList.end(), localList.begin(), localList.end());
         }
+        return containerList;
     } catch (std::invalid_argument & e) {
         throw(std::invalid_argument("ContainerManager::processSingleContainer." + std::string(e.what())));
     }

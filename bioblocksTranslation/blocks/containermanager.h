@@ -26,6 +26,7 @@
 #include <memory>
 #include <stdexcept>
 #include <tuple>
+#include <unordered_map>
 
 //lib
 #include <json.hpp>
@@ -34,20 +35,36 @@
 #include <protocolGraph/ProtocolGraph.h>
 
 #include "bioblocksTranslation/blocks/blocksutils.h"
+#include "bioblocksTranslation/blocks/mathblocks.h"
 
 class ContainerManager
 {
 public:
-    ContainerManager(std::shared_ptr<ProtocolGraph> protocolPtr);
+    typedef  std::tuple<std::shared_ptr<MathematicOperable>, units::Volume>  VolumeTuple;
+    typedef  std::tuple<std::shared_ptr<MathematicOperable>, units::Volumetric_Flow>  RateTuple;
+    typedef  std::unordered_map<std::string,VolumeTuple>  VolumeMap;
+    typedef  std::unordered_map<std::string,RateTuple>  RateMap;
+
+    ContainerManager(std::shared_ptr<ProtocolGraph> protocolPtr, std::shared_ptr<MathBlocks> mathBlocks);
     virtual ~ContainerManager();
 
-    void processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    std::vector<std::string> processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument);
+
+    VolumeMap  extractVolume(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    RateMap  extractRate(const nlohmann::json & containerObj) throw(std::invalid_argument);
 
 protected:
     std::shared_ptr<ProtocolGraph> protocolPtr;
+    std::shared_ptr<MathBlocks> mathBlocks;
 
-    void processSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
-    void processContainerList(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    std::pair<std::string, VolumeTuple> extractVolumeSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    VolumeMap extractVolumeListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
+
+    std::pair<std::string, RateTuple> extractRateSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    RateMap extractRateListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
+
+    std::string processSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    std::vector<std::string> processContainerList(const nlohmann::json & containerObj) throw(std::invalid_argument);
 
     units::Temperature getStoreTemperature(const std::string & storeStr) throw(std::invalid_argument);
     std::tuple<units::Volume,VirtualContainer::ContainerType> parseType(const std::string & typeStr) throw(std::invalid_argument);

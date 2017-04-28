@@ -31,3 +31,24 @@ units::Volume BlocksUtils::getVolumeUnits(const std::string & unitsStr) throw(st
     }
     return vol;
 }
+
+void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT) {
+    try {
+        checkPropertiesExists(std::vector<std::string>{"timeOfOperation", "timeOfOperation_units"}, objJSON);
+
+        initT = std::atoi(objJSON["timeOfOperation"]) * getVolumeUnits("timeOfOperation_units");
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("BlocksUtils::fillTimeSetting. " + std::string(e.what())));
+    }
+}
+
+void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT, units::Time & duration) {
+    try {
+        checkPropertiesExists(std::vector<std::string>{"timeOfOperation", "timeOfOperation_units", "duration", "duration_units"}, objJSON);
+
+        initT = std::atoi(objJSON["timeOfOperation"]) * getVolumeUnits("timeOfOperation_units");
+        duration = std::atoi(objJSON["duration"]) * getVolumeUnits("duration_units");
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("BlocksUtils::fillTimeSetting. " + std::string(e.what())));
+    }
+}

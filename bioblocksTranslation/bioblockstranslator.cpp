@@ -26,7 +26,7 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(const std::str
         mathBlocks->setLogicTrans(logicBlocks);
         logicBlocks->setMathTrans(mathBlocks);
 
-        std::shared_ptr<ContainerManager> contBlocks = std::make_shared<ContainerManager>(ptrGraph);
+        std::shared_ptr<ContainerManager> contBlocks = std::make_shared<ContainerManager>(ptrGraph, mathBlocks);
         std::shared_ptr<OperationsBlocks> opBlocks = std::make_shared<OperationsBlocks>(ptrGraph, contBlocks, logicBlocks, mathBlocks);
 
         json blocksList = js["linkedBlocks"];
