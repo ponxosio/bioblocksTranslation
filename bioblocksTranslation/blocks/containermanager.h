@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 
 //lib
 #include <json.hpp>
@@ -40,10 +41,13 @@
 class ContainerManager
 {
 public:
-    typedef  std::tuple<std::shared_ptr<MathematicOperable>, units::Volume>  VolumeTuple;
-    typedef  std::tuple<std::shared_ptr<MathematicOperable>, units::Volumetric_Flow>  RateTuple;
-    typedef  std::unordered_map<std::string,VolumeTuple>  VolumeMap;
-    typedef  std::unordered_map<std::string,RateTuple>  RateMap;
+    typedef std::tuple<units::Temperature, units::Time> PCRStepTuple;
+    typedef std::tuple<std::shared_ptr<MathematicOperable>, units::Volume>  VolumeTuple;
+    typedef std::tuple<std::shared_ptr<MathematicOperable>, units::Volumetric_Flow>  RateTuple;
+
+    typedef std::unordered_map<std::string,VolumeTuple>  VolumeMap;
+    typedef std::unordered_map<std::string,RateTuple>  RateMap;
+    typedef std::vector<PCRStepTuple> PCRStepVector;
 
     ContainerManager(std::shared_ptr<ProtocolGraph> protocolPtr, std::shared_ptr<MathBlocks> mathBlocks);
     virtual ~ContainerManager();
@@ -52,6 +56,7 @@ public:
 
     VolumeMap  extractVolume(const nlohmann::json & containerObj) throw(std::invalid_argument);
     RateMap  extractRate(const nlohmann::json & containerObj) throw(std::invalid_argument);
+    PCRStepVector extractPCRSteps(const nlohmann::json & containerObj) throw(std::invalid_argument);
 
 protected:
     std::shared_ptr<ProtocolGraph> protocolPtr;

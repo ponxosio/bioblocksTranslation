@@ -19,7 +19,7 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(const std::str
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"tittle", "linkedBlocks"}, js);
 
         std::string protocolName = js["tittle"];
-        std::shared_ptr<ProtocolGraph> ptrGraph = std::make_shared(protocolName);
+        ptrGraph = std::make_shared(protocolName);
 
         std::shared_ptr<MathBlocks> mathBlocks = std::make_shared(ptrGraph);
         std::shared_ptr<LogicBlocks> logicBlocks = std::make_shared(ptrGraph);
@@ -44,4 +44,21 @@ void BioBlocksTranslator::processLinkedBlocksList(const nlohmann::json & blockOb
 
 void BioBlocksTranslator::processLinkedBlocks(const nlohmann::json & blockObj, std::shared_ptr<OperationsBlocks> blocksTrans) {
 
+}
+
+void BioBlocksTranslator::variablesSet(const nlohmann::json & variableSetObj, std::shared_ptr<OperationsBlocks> blocksTrans)
+    throw(std::invalid_argument)
+{
+    try {
+        checkPropertiesExists(std::vector<std::string>{"variable", "value"}, variableSetObj);
+
+        std::string varName = variableSetObj["variable"];
+        std::shared_ptr<MathematicOperable> varValue = blocksTrans->getMathBlocks()->translateMathBlock(variableSetObj["value"]);
+
+        int op = ptrGraph->emplaceAssignation(varName, varValue);
+        initializationOps.push_back(op);
+
+    } catch (std::exception & e) {
+        throw(std::invalid_argument("BioBlocksTranslator::variablesSet. " + std::string(e.what())));
+    }
 }

@@ -68,6 +68,33 @@ ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & 
     }
 }
 
+ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann::json & containerObj) throw(std::invalid_argument) {
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"steps"}, containerObj);
+        PCRStepVector steps;
+
+        int stepsNum = std::atoi(containerObj["steps"]);
+        for(int i = 0; i < stepsNum; i++) {
+            BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+                                               "temperature" + std::to_string(i),
+                                               "temperature_units" + std::to_string(i),
+                                               "duration" + std::to_string(i),
+                                               "duration_units" + std::to_string(i)}, containerObj);
+
+            units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units"]);
+            int temperature = std::stoi(containerObj["temperature"]);
+
+            units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units"]);
+            int duration = std::stoi(containerObj["duration"]);
+
+            steps.push_back(std::make_tuple(temperature*temperatureUnits, duration*durationUnits));
+        }
+        return steps;
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("ContainerManager::extractVolumeSingleContainer." + std::string(e.what())));
+    }
+}
+
 std::pair<std::string, ContainerManager::VolumeTuple> ContainerManager::extractVolumeSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName", "volume","unit_volume"}, containerObj);
