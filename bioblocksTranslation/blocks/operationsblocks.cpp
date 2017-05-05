@@ -99,8 +99,8 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
         } case 3: {//many to one
             ContainerManager::VolumeMap volumeMap = ContainerManager::extractVolume(pipetteObj["source"]);
 
-            const std::string & sourceName = sourceContainers[0];
-            for(const std::string & destinationName : destinationContainers) {
+            const std::string & sourceName = destinationContainers[0];
+            for(const std::string & destinationName : sourceContainers) {
                 std::shared_ptr<MathematicalOperable> volume = std::get<0>(volumeMap[destinationName]);
                 units::Volume volumeUnits = std::get<1>(volumeMap[destinationName]);
 
