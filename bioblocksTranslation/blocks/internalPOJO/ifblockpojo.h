@@ -6,10 +6,12 @@
 
 #include <protocolGraph/operables/comparison/ComparisonOperable.h>
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
-#include <protocolGraph/operables/mathematics/VariableEntry>
+#include <protocolGraph/operables/mathematics/VariableEntry.h>
 #include <utils/units.h>
 
-class IfBlockPOJO
+#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+
+class IfBlockPOJO : public BlockPOJOInterface
 {
 public:
     IfBlockPOJO() {
@@ -55,7 +57,7 @@ public:
         return trigeredVar;
     }
 
-    inline std::shared_ptr<VariableEntry> getEndIfVar() const {
+    inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
         return endIfVar;
     }
 

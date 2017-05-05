@@ -6,10 +6,12 @@
 
 #include <protocolGraph/operables/comparison/ComparisonOperable.h>
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
-#include <protocolGraph/operables/mathematics/VariableEntry>
+#include <protocolGraph/operables/mathematics/VariableEntry.h>
 #include <utils/units.h>
 
-class WhileBlockPOJO
+#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+
+class WhileBlockPOJO : public BlockPOJOInterface
 {
 public:
     WhileBlockPOJO() {
@@ -56,7 +58,7 @@ public:
         return initVar;
     }
 
-    inline std::shared_ptr<VariableEntry> getEndVar() const {
+    inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
         return endVar;
     }
 

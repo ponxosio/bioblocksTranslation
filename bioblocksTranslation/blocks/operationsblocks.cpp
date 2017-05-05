@@ -79,7 +79,8 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
             std::shared_ptr<MathematicalOperable> volume = std::get<0>(volumeMap[destinationName]);
             units::Volume volumeUnits = std::get<1>(volumeMap[destinationName]);
 
-            opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits));
+            int transferId = graphPtr->getNextAvailableNodeId();
+            opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits, BlocksUtils::generateDurationOpVar(transferId)));
             break;
         } case 2: {//one to many
             ContainerManager::VolumeMap volumeMap = ContainerManager::extractVolume(pipetteObj["destination"]);
@@ -89,7 +90,8 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
                 std::shared_ptr<MathematicalOperable> volume = std::get<0>(volumeMap[destinationName]);
                 units::Volume volumeUnits = std::get<1>(volumeMap[destinationName]);
 
-                opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits));
+                int transferId = graphPtr->getNextAvailableNodeId();
+                opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits, BlocksUtils::generateDurationOpVar(transferId)));
             }
             break;
         } case 3: {//many to one
@@ -100,7 +102,8 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
                 std::shared_ptr<MathematicalOperable> volume = std::get<0>(volumeMap[destinationName]);
                 units::Volume volumeUnits = std::get<1>(volumeMap[destinationName]);
 
-                opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits));
+                int transferId = graphPtr->getNextAvailableNodeId();
+                opsIds.push_back(graphPtr->emplaceTransfer(sourceName, destinationName, volume, volumeUnits, BlocksUtils::generateDurationOpVar(transferId)));
             }
             break;
         } default:

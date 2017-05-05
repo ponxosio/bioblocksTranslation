@@ -6,16 +6,19 @@
 
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
 #include <protocolGraph/operables/mathematics/VariableEntry.h>
+#include <protocolGraph/operables/mathematics/protocolmathf.h>
 #include <utils/units.h>
 
-class BioBlocksOpPOJO
+#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+
+class BioBlocksOpPOJO : public BlockPOJOInterface
 {
+    typedef ProtocolMathF MF;
 public:
     BioBlocksOpPOJO() {
         opIds = -1;
-        duration = -1*units::s;
+        duration = NULL;
         initTime = NULL;
-        finishOpVar = NULL;
         endIfVar = NULL;
     }
 
@@ -23,20 +26,17 @@ public:
         opIds = bbpojo.opIds;
         duration = bbpojo.duration;
         initTime = bbpojo.initTime;
-        finishOpVar = bbpojo.finishOpVar;
         endIfVar = bbpojo.finishOpVar;
     }
 
     BioBlocksOpPOJO(
             int opId,
-            units::Time duration,
+            std::shared_ptr<MathematicOperable> duration,
             std::shared_ptr<MathematicOperable> initTime,
-            std::shared_ptr<VariableEntry> finishOpVar,
             std::shared_ptr<VariableEntry> endIfVar = NULL)
     {
         this->duration = duration;
         this->initTime = initTime;
-        this->finishOpVar = finishOpVar;
         this->endIfVar = endIfVar;
 
         opIds.push_back(opId);
@@ -44,15 +44,13 @@ public:
 
     BioBlocksOpPOJO(
             std::vector<int> opIds,
-            units::Time duration,
+            std::shared_ptr<MathematicOperable> duration,
             std::shared_ptr<MathematicOperable> initTime,
-            std::shared_ptr<VariableEntry> finishOpVar,
             std::shared_ptr<VariableEntry> endIfVar = NULL) :
         opIds(opIds)
     {
         this->duration = duration;
         this->initTime = initTime;
-        this->finishOpVar = finishOpVar;
         this->endIfVar = endIfVar;
     }
 
@@ -62,7 +60,7 @@ public:
         return opIds;
     }
 
-    inline units::Time getDuration() const {
+    inline std::shared_ptr<MathematicOperable> getDuration() const {
         return duration;
     }
 
@@ -70,8 +68,8 @@ public:
         return initTime;
     }
 
-    inline std::shared_ptr<VariableEntry> getFinishOpVar() const {
-        return finishOpVar;
+    inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
+        return MF::add(initTime,duration);
     }
 
     inline std::shared_ptr<VariableEntry> getEndIfVar() const {
@@ -80,9 +78,8 @@ public:
 
 protected:
     std::vector<int> opIds;
-    units::Time duration;
+    std::shared_ptr<MathematicOperable> duration;
     std::shared_ptr<MathematicOperable> initTime;
-    std::shared_ptr<VariableEntry> finishOpVar;
     std::shared_ptr<VariableEntry> endIfVar;
 
 

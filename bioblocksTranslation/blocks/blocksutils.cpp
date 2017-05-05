@@ -11,9 +11,13 @@ void BlocksUtils::checkPropertiesExists(const std::vector<std::string> & propert
 }
 
 std::string BlocksUtils::generateNoPropertyErrorMsg(const nlohmann::json & objJSON, const std::string & property) {
+    return jsonObjToStr(objJSON) + "JSON has no property \"" + property + "\"";
+}
+
+std::string BlocksUtils::jsonObjToStr(const nlohmann::json & objJSON, const std::string & property) {
     std::stringstream stream;
     stream << objJSON;
-    return stream.str() + "JSON has no property \"" + property + "\"";
+    return stream.str();
 }
 
 units::Volume BlocksUtils::getVolumeUnits(const std::string & unitsStr) throw(std::invalid_argument) {
@@ -32,23 +36,27 @@ units::Volume BlocksUtils::getVolumeUnits(const std::string & unitsStr) throw(st
     return vol;
 }
 
-void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT) {
+void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT, units::Time & duration) {
     try {
         checkPropertiesExists(std::vector<std::string>{"timeOfOperation", "timeOfOperation_units"}, objJSON);
 
-        initT = std::atoi(objJSON["timeOfOperation"]) * getVolumeUnits("timeOfOperation_units");
+        initT = std::atof(objJSON["timeOfOperation"]) * getVolumeUnits("timeOfOperation_units");
+
+        if (objJSON["duration"] != null) {
+            checkPropertiesExists(std::vector<std::string>{"duration_units"}, objJSON);
+            duration = std::atof(objJSON["duration"]) * getVolumeUnits("duration_units");
+        } else {
+            duration = -1*units::s;
+        }
     } catch (std::invalid_argument & e) {
         throw(std::invalid_argument("BlocksUtils::fillTimeSetting. " + std::string(e.what())));
     }
 }
 
-void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT, units::Time & duration) {
-    try {
-        checkPropertiesExists(std::vector<std::string>{"timeOfOperation", "timeOfOperation_units", "duration", "duration_units"}, objJSON);
+std::string BlocksUtils::generateFinishOpVar(int op) {
+    return "finish_op" + std::to_string(op);
+}
 
-        initT = std::atoi(objJSON["timeOfOperation"]) * getVolumeUnits("timeOfOperation_units");
-        duration = std::atoi(objJSON["duration"]) * getVolumeUnits("duration_units");
-    } catch (std::invalid_argument & e) {
-        throw(std::invalid_argument("BlocksUtils::fillTimeSetting. " + std::string(e.what())));
-    }
+std::string BlocksUtils::generateDurationOpVar(int op) {
+    return "duration_op" + std::to_string(op);
 }

@@ -44,7 +44,9 @@ HEADERS += \
     bioblocksTranslation/blocks/blocksutils.h \
     bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h \
     bioblocksTranslation/blocks/internalPOJO/ifblockpojo.h \
-    bioblocksTranslation/blocks/internalPOJO/whileblockpojo.h
+    bioblocksTranslation/blocks/internalPOJO/whileblockpojo.h \
+    bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h \
+    bioblocksTranslation/blocks/internalPOJO/cpublockpojo.h
 
 debug {
     QMAKE_POST_LINK=X:\bioblocksTranslation\bioblocksTranslation\setDLL.bat $$shell_path($$OUT_PWD/debug) debug
@@ -73,7 +75,7 @@ SOURCES += \
     bioblocksTranslation/blocks/logicblocks.cpp \
     bioblocksTranslation/blocks/mathblocks.cpp \
     bioblocksTranslation/blocks/blocksutils.cpp \
-    bioblocksTranslation/blocks/internalPOJO/whileblockpojo.cpp
+    bioblocksTranslation/blocks/internalPOJO/cpublockpojo.cpp
 
 
 INCLUDEPATH += X:\libraries\json-2.1.1\src

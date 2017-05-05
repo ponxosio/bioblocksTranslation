@@ -22,6 +22,7 @@ class BlocksUtils
 public:
     static void checkPropertiesExists(const std::vector<std::string> & properties, const nlohmann::json & objJSON) throw(std::invalid_argument);
     static std::string generateNoPropertyErrorMsg(const nlohmann::json & objJSON, const std::string & property);
+    static std::string jsonObjToStr(const nlohmann::json & objJSON);
 
     static units::Volume getVolumeUnits(const std::string & unitsStr) throw(std::invalid_argument);
     static units::Temperature getTemperatureUnits(const std::string & unitsStr) throw(std::invalid_argument);
@@ -30,8 +31,10 @@ public:
     static units::Time getTimeUnits(const std::string & unitsStr) throw(std::invalid_argument);
     static units::ElectricPotential getElectricPotentialUnits(const std::string & unitsStr) throw(std::invalid_argument);
 
-    static void fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT);
     static void fillTimeSetting(const nlohmann::json & objJSON, units::Time & initT, units::Time & duration);
+
+    static std::string generateFinishOpVar(int op);
+    static std::string generateDurationOpVar(int op);
 
     virtual ~BlocksUtils(){}
 private:

@@ -16,9 +16,12 @@
 
 //local
 #include <protocolGraph/ProtocolGraph.h>
+#include <protocolGraph/operables/mathematics/protocolmathf.h>
 
 //own project
 #include "bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h"
+#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+#include "bioblocksTranslation/blocks/internalPOJO/cpublockpojo.h"
 #include "bioblocksTranslation/blocks/internalPOJO/ifblockpojo.h"
 #include "bioblocksTranslation/blocks/internalPOJO/whileblockpojo.h"
 
@@ -42,9 +45,12 @@ protected:
     std::shared_ptr<ProtocolGraph> ptrGraph;
 
     std::vector<int> initializationOps;
-    std::vector<BioBlocksOpPOJO> blocksOps;
-    std::vector<IfBlockPOJO> ifsOps;
-    std::vector<WhileBlockPOJO> whileOps;
+    std::vector<std::shared_ptr<BlockPOJOInterface>> blocksOps;
+    std::vector<std::shared_ptr<BlockPOJOInterface>> logicOps;
+
+    std::shared_ptr<BlockPOJOInterface> lastBlockProcess;
+
+    void resetAttributes(const std::string & protocolName);
 
     void processLinkedBlocksList(const nlohmann::json & blockObj, std::shared_ptr<OperationsBlocks> blocksTrans);
     void processLinkedBlocks(const nlohmann::json & blockObj, std::shared_ptr<OperationsBlocks> blocksTrans);
@@ -52,8 +58,10 @@ protected:
     void thermocyclingOperation(const nlohmann::json & thermocyclingObj,
                                 std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
 
+    void initializeVarToInfinite(const std::string & name);
     void variablesSet(const nlohmann::json & variableSetObj,
                      std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
+
 
     void bioblocksIfOperation(const nlohmann::json & bioblocksIfObj,
                               std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
@@ -62,7 +70,8 @@ protected:
                                  std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
 
     void processBioBlocksOp(const nlohmann::json & bioblocksObj,
-                            std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
+                            std::shared_ptr<OperationsBlocks> blocksTrans,
+                            std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 };
 
 #endif // BIOBLOCKSTRANSLATOR_H
