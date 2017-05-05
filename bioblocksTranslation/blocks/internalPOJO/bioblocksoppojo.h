@@ -5,14 +5,14 @@
 #include <string>
 
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
-#include <protocolGraph/operables/mathematics/VariableEntry>
+#include <protocolGraph/operables/mathematics/VariableEntry.h>
 #include <utils/units.h>
 
 class BioBlocksOpPOJO
 {
 public:
     BioBlocksOpPOJO() {
-        opId = -1;
+        opIds = -1;
         duration = -1*units::s;
         initTime = NULL;
         finishOpVar = NULL;
@@ -20,7 +20,7 @@ public:
     }
 
     BioBlocksOpPOJO(const BioBlocksOpPOJO & bbpojo) {
-        opId = bbpojo.opId;
+        opIds = bbpojo.opIds;
         duration = bbpojo.duration;
         initTime = bbpojo.initTime;
         finishOpVar = bbpojo.finishOpVar;
@@ -34,7 +34,22 @@ public:
             std::shared_ptr<VariableEntry> finishOpVar,
             std::shared_ptr<VariableEntry> endIfVar = NULL)
     {
-        this->opId = opId;
+        this->duration = duration;
+        this->initTime = initTime;
+        this->finishOpVar = finishOpVar;
+        this->endIfVar = endIfVar;
+
+        opIds.push_back(opId);
+    }
+
+    BioBlocksOpPOJO(
+            std::vector<int> opIds,
+            units::Time duration,
+            std::shared_ptr<MathematicOperable> initTime,
+            std::shared_ptr<VariableEntry> finishOpVar,
+            std::shared_ptr<VariableEntry> endIfVar = NULL) :
+        opIds(opIds)
+    {
         this->duration = duration;
         this->initTime = initTime;
         this->finishOpVar = finishOpVar;
@@ -43,8 +58,8 @@ public:
 
     virtual ~BioBlocksOpPOJO() {}
 
-    inline int getOpId() const {
-        return opId;
+    inline const std::vector<int> & getOpIds() const {
+        return opIds;
     }
 
     inline units::Time getDuration() const {
@@ -64,7 +79,7 @@ public:
     }
 
 protected:
-    int opId;
+    std::vector<int> opIds;
     units::Time duration;
     std::shared_ptr<MathematicOperable> initTime;
     std::shared_ptr<VariableEntry> finishOpVar;

@@ -45,6 +45,17 @@ public:
 
     std::vector<int> processBlock(const nlohmann::json & blockObj) throw(std::invalid_argument);
 
+    inline std::shared_ptr<ContainerManager> getVCManager() const {
+        return vcManager;
+    }
+
+    inline std::shared_ptr<MathBlocks> getMathBlocks() const {
+        return mathBlocks;
+    }
+
+    inline std::shared_ptr<LogicBlocks> getLogicBlocks() const {
+        return logicBlocks;
+    }
 protected:
     std::shared_ptr<ProtocolGraph> graphPtr;
     std::shared_ptr<ContainerManager> vcManager;
@@ -54,9 +65,8 @@ protected:
     std::vector<int> pipetteOperation(const nlohmann::json & pipetteObj) throw(std::invalid_argument);
     std::vector<int> continuousflowOperation(const nlohmann::json & continuousflowObj) throw(std::invalid_argument);
     int electrophoresisOperation(const nlohmann::json & electrophoresisObj) throw(std::invalid_argument);
-    int incubateOperation(const nlohmann::json & incubateObj) throw(std::invalid_argument);
-    int centrifugationOperation(const nlohmann::json & centrifugationObj) throw(std::invalid_argument);
-    int thermocyclingOperation(const nlohmann::json & thermocyclingObj) throw(std::invalid_argument);
+    std::vector<int> incubateOperation(const nlohmann::json & incubateObj) throw(std::invalid_argument);
+    std::vector<int> centrifugationOperation(const nlohmann::json & centrifugationObj) throw(std::invalid_argument);
     int measurementOperation(const nlohmann::json & measurementObj) throw(std::invalid_argument);
     int sangerSequencingOperation(const nlohmann::json & sangerSequencingObj) throw(std::invalid_argument);
     int oligosynthesizeOperation(const nlohmann::json & oligosynthesizeObj) throw(std::invalid_argument);
