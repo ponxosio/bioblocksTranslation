@@ -6,45 +6,43 @@
 
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
 #include <protocolGraph/operables/mathematics/VariableEntry.h>
+#include <protocolGraph/operables/mathematics/protocolmathf.h>
+#include <protocolGraph/operables/comparison/protocolboolf.h>
+
 #include <utils/units.h>
 
 #include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+#include "bioblocksTranslation/blocks/blocksutils.h"
 
-class CpuBlockPOJO
+class CpuBlockPOJO : public BlockPOJOInterface
 {
 public:
-    CpuBlockPOJO() {
-        opIds = -1;
-        initTime = NULL;
-    }
+    CpuBlockPOJO();
+    CpuBlockPOJO(const CpuBlockPOJO & bbpojo);
+    CpuBlockPOJO(int opId,
+                 std::shared_ptr<MathematicOperable> initTime,
+                 std::shared_ptr<VariableEntry> endIfVar = NULL);
 
-    CpuBlockPOJO(const CpuBlockPOJO & bbpojo) {
-        opIds = bbpojo.opIds;
-        initTime = bbpojo.initTime;
-    }
-
-    CpuBlockPOJO(
-            int opId,
-            std::shared_ptr<MathematicOperable> initTime)
-    {
-        this->initTime = initTime;
-        this->opIds = opId;
-    }
-
-    virtual ~CpuBlockPOJO() {}
-
+    virtual ~CpuBlockPOJO();
 
     inline std::shared_ptr<MathematicOperable> getInitTime() const {
         return initTime;
     }
 
-    inline virtual std::shared_ptr<VariableEntry> getEndVariable() const {
+    inline std::shared_ptr<VariableEntry> getEndIfVar() const {
+        return endIfVar;
+    }
+
+    inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
         return initTime;
     }
 
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
+
 protected:
-    int opIds;
-    std::shared_ptr<VariableEntry> initTime;
+    int opId;
+    std::shared_ptr<MathematicOperable> initTime;
+    std::shared_ptr<VariableEntry> endIfVar;
 };
 
 #endif // CPUBLOCKPOJO_H

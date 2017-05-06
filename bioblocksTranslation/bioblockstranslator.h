@@ -5,6 +5,7 @@
 
 #define BIOBLOCKS_IF_STR "bioblocks_if"
 #define BIOBLOCKS_WHILE_STR "bioblocks_while"
+#define BIOBLOCKS_THERMOCYCLING_STR "thermocycling"
 
 #include <fstream>
 #include <stdexcept>
@@ -16,7 +17,10 @@
 
 //local
 #include <protocolGraph/ProtocolGraph.h>
+#include <protocolGraph/operables/comparison/protocolboolf.h>
 #include <protocolGraph/operables/mathematics/protocolmathf.h>
+
+#include <utils/AutoEnumerate.h>
 
 //own project
 #include "bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h"
@@ -48,30 +52,49 @@ protected:
     std::vector<std::shared_ptr<BlockPOJOInterface>> blocksOps;
     std::vector<std::shared_ptr<BlockPOJOInterface>> logicOps;
 
+    AutoEnumerate logicSerial;
     std::shared_ptr<BlockPOJOInterface> lastBlockProcess;
+    std::shared_ptr<MathematicOperable> protocolEndTime;
 
+    void makeProtocolGraph();
+    void setTimeStep();
     void resetAttributes(const std::string & protocolName);
 
-    void processLinkedBlocksList(const nlohmann::json & blockObj, std::shared_ptr<OperationsBlocks> blocksTrans);
-    void processLinkedBlocks(const nlohmann::json & blockObj, std::shared_ptr<OperationsBlocks> blocksTrans);
+    void processLinkedBlocks(nlohmann::json blockObj,
+                             const OperationsBlocks & blocksTrans,
+                             std::shared_ptr<MathematicOperable> initTime = NULL,
+                             std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 
     void thermocyclingOperation(const nlohmann::json & thermocyclingObj,
-                                std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
+                                const OperationsBlocks & blocksTrans,
+                                std::shared_ptr<MathematicOperable> initTime = NULL,
+                                std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 
-    void initializeVarToInfinite(const std::string & name);
     void variablesSet(const nlohmann::json & variableSetObj,
-                     std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
-
+                      const OperationsBlocks & blocksTrans,
+                      std::shared_ptr<MathematicOperable> initTime,
+                      std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 
     void bioblocksIfOperation(const nlohmann::json & bioblocksIfObj,
-                              std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
+                              const OperationsBlocks & blocksTrans,
+                              std::shared_ptr<MathematicOperable> initTime = NULL,
+                              std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 
     void bioblocksWhileOperation(const nlohmann::json & bioblocksWhileObj,
-                                 std::shared_ptr<OperationsBlocks> blocksTrans) throw(std::invalid_argument);
+                                 const OperationsBlocks & blocksTrans,
+                                 std::shared_ptr<MathematicOperable> initTime = NULL,
+                                 std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
 
     void processBioBlocksOp(const nlohmann::json & bioblocksObj,
-                            std::shared_ptr<OperationsBlocks> blocksTrans,
-                            std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                            const OperationsBlocks & blocksTrans,
+                            std::shared_ptr<MathematicOperable> initTime = NULL,
+                            std::shared_ptr<VariableEntry> endIfVar = NULL);
+
+    void initializeVarToInfinite(const std::string & name);
+    void initializeVarToZero(const std::string & name);
+
+    std::shared_ptr<MathematicOperable> processIniTime(units::Time initTime) throw(std::invalid_argument);
+    std::shared_ptr<MathematicOperable> processDuration(units::Time duration, const std::vector<int> & ops);
 };
 
 #endif // BIOBLOCKSTRANSLATOR_H

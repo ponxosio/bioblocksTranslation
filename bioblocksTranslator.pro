@@ -75,7 +75,10 @@ SOURCES += \
     bioblocksTranslation/blocks/logicblocks.cpp \
     bioblocksTranslation/blocks/mathblocks.cpp \
     bioblocksTranslation/blocks/blocksutils.cpp \
-    bioblocksTranslation/blocks/internalPOJO/cpublockpojo.cpp
+    bioblocksTranslation/blocks/internalPOJO/cpublockpojo.cpp \
+    bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.cpp \
+    bioblocksTranslation/blocks/internalPOJO/ifblockpojo.cpp \
+    bioblocksTranslation/blocks/internalPOJO/whileblockpojo.cpp
 
 
 INCLUDEPATH += X:\libraries\json-2.1.1\src

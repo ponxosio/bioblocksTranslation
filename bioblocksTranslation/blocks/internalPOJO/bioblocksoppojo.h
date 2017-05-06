@@ -7,54 +7,29 @@
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
 #include <protocolGraph/operables/mathematics/VariableEntry.h>
 #include <protocolGraph/operables/mathematics/protocolmathf.h>
+#include <protocolGraph/operables/comparison/protocolboolf.h>
+
 #include <utils/units.h>
 
 #include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+#include "bioblocksTranslation/blocks/blocksutils.h"
 
 class BioBlocksOpPOJO : public BlockPOJOInterface
 {
     typedef ProtocolMathF MF;
 public:
-    BioBlocksOpPOJO() {
-        opIds = -1;
-        duration = NULL;
-        initTime = NULL;
-        endIfVar = NULL;
-    }
+    BioBlocksOpPOJO();
+    BioBlocksOpPOJO(const BioBlocksOpPOJO & bbpojo);
+    BioBlocksOpPOJO(int opId,
+                    std::shared_ptr<MathematicOperable> duration,
+                    std::shared_ptr<MathematicOperable> initTime,
+                    std::shared_ptr<VariableEntry> endIfVar = NULL);
+    BioBlocksOpPOJO(std::vector<int> opIds,
+                    std::shared_ptr<MathematicOperable> duration,
+                    std::shared_ptr<MathematicOperable> initTime,
+                    std::shared_ptr<VariableEntry> endIfVar = NULL);
 
-    BioBlocksOpPOJO(const BioBlocksOpPOJO & bbpojo) {
-        opIds = bbpojo.opIds;
-        duration = bbpojo.duration;
-        initTime = bbpojo.initTime;
-        endIfVar = bbpojo.finishOpVar;
-    }
-
-    BioBlocksOpPOJO(
-            int opId,
-            std::shared_ptr<MathematicOperable> duration,
-            std::shared_ptr<MathematicOperable> initTime,
-            std::shared_ptr<VariableEntry> endIfVar = NULL)
-    {
-        this->duration = duration;
-        this->initTime = initTime;
-        this->endIfVar = endIfVar;
-
-        opIds.push_back(opId);
-    }
-
-    BioBlocksOpPOJO(
-            std::vector<int> opIds,
-            std::shared_ptr<MathematicOperable> duration,
-            std::shared_ptr<MathematicOperable> initTime,
-            std::shared_ptr<VariableEntry> endIfVar = NULL) :
-        opIds(opIds)
-    {
-        this->duration = duration;
-        this->initTime = initTime;
-        this->endIfVar = endIfVar;
-    }
-
-    virtual ~BioBlocksOpPOJO() {}
+    virtual ~BioBlocksOpPOJO();
 
     inline const std::vector<int> & getOpIds() const {
         return opIds;
@@ -75,6 +50,8 @@ public:
     inline std::shared_ptr<VariableEntry> getEndIfVar() const {
         return endIfVar;
     }
+
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
 
 protected:
     std::vector<int> opIds;

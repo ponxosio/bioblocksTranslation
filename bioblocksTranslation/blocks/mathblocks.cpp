@@ -53,7 +53,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohman
 
         return op;
     } else {
-        throw(std::invalid_argument("MathBlocks::translateMathBlock." + + BlocksUtils::generateNoPropertyErrorMsg(mathNumberObj, "block_type") ));
+        throw(std::invalid_argument("MathBlocks::translateMathBlock." + BlocksUtils::generateNoPropertyErrorMsg(mathJSONObj, "block_type") ));
     }
 }
 

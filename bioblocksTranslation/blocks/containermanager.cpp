@@ -17,11 +17,11 @@ std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann:
 
         std::vector<std::string> containerList;
         if (contStr.compare(SINGLE_CONATINER_BLOCK_STR) == 0) {
-            containerList.push_back(processContainerBlock(containerObj));
+            containerList.push_back(processSingleContainer(containerObj));
         } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
             containerList = processContainerList(containerObj);
         } else {
-            throw(std::invalid_argument("ContainerManager::processContainerBlock. Unknow block type: \"" + opStr + "\""));
+            throw(std::invalid_argument("ContainerManager::processContainerBlock. Unknow block type: \"" + contStr + "\""));
         }
         return containerList;
     } else {
@@ -40,7 +40,7 @@ ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::jso
         } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
             volumeList = extractVolumeListContainer(containerObj);
         } else {
-            throw(std::invalid_argument("ContainerManager::extractVolume. Unknow block type: \"" + opStr + "\""));
+            throw(std::invalid_argument("ContainerManager::extractVolume. Unknow block type: \"" + contStr + "\""));
         }
         return volumeList;
     } else {
@@ -59,7 +59,7 @@ ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & 
         } else if (contStr.compare(LIST_CONATINER_BLOCK_STR) == 0) {
             rateList = extractRateListContainer(containerObj);
         } else {
-            throw(std::invalid_argument("ContainerManager::extractRate. Unknow block type: \"" + opStr + "\""));
+            throw(std::invalid_argument("ContainerManager::extractRate. Unknow block type: \"" + contStr + "\""));
         }
         return rateList;
     } else {
@@ -73,7 +73,7 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"steps"}, containerObj);
         PCRStepVector steps;
 
-        int stepsNum = std::atoi(containerObj["steps"]);
+        int stepsNum = (int)(containerObj["steps"]);
         for(int i = 0; i < stepsNum; i++) {
             BlocksUtils::checkPropertiesExists(std::vector<std::string>{
                                                "temperature" + std::to_string(i),
@@ -82,10 +82,10 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
                                                "duration_units" + std::to_string(i)}, containerObj);
 
             units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units"]);
-            int temperature = std::stoi(containerObj["temperature"]);
+            double temperature = (double)(containerObj["temperature"]);
 
             units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units"]);
-            int duration = std::stoi(containerObj["duration"]);
+            int duration = (int)(containerObj["duration"]);
 
             steps.push_back(std::make_tuple(temperature*temperatureUnits, duration*durationUnits));
         }
@@ -171,7 +171,7 @@ std::string ContainerManager::processSingleContainer(const nlohmann::json & cont
             units::Volume initialVolume = -1 * units::ml;
             if (std::get<1>(typeTuple) == VirtualContainer::tube) {
                 BlocksUtils::checkPropertiesExists(std::vector<std::string>{"initialVolume","initialVolumeUnits"}, containerObj);
-                initialVolume = std::atoi(containerObj["initialVolume"]) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
+                initialVolume = (double)(containerObj["initialVolume"]) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
             }
             protocolPtr->addVContainer(name, std::get<1>(typeTuple),std::get<0>(typeTuple),initialVolume, store);
 
@@ -224,32 +224,32 @@ units::Temperature ContainerManager::getStoreTemperature(const std::string & sto
 std::tuple<units::Volume,VirtualContainer::ContainerType> ContainerManager::parseType(const std::string & typeStr) throw(std::invalid_argument) {
     units::Volume maxVol;
     VirtualContainer::ContainerType type;
-    if (capStr.compare(EPPENDORF_TUBE_2_ML_STR) == 0) {
+    if (typeStr.compare(EPPENDORF_TUBE_2_ML_STR) == 0) {
         maxVol = 2.0 * units::ml;
         type = VirtualContainer::tube;
-    } else if (capStr.compare(EPPENDORF_TUBE_6_ML_STR) == 0) {
+    } else if (typeStr.compare(EPPENDORF_TUBE_6_ML_STR) == 0) {
         maxVol = 6.0 * units::ml;
         type = VirtualContainer::tube;
-    } else if (capStr.compare(AGAROSE_GEL_STR) == 0) {
+    } else if (typeStr.compare(AGAROSE_GEL_STR) == 0) {
         maxVol = 0.03 * units::ml;
         type = VirtualContainer::gel;
-    } else if (capStr.compare(PETRI_DISH_STR) == 0) {
+    } else if (typeStr.compare(PETRI_DISH_STR) == 0) {
         maxVol = 50.0 * units::ml;
         type = VirtualContainer::petri_dish;
-    } else if (capStr.compare(WELL_PLATE_96_STR) == 0) {
+    } else if (typeStr.compare(WELL_PLATE_96_STR) == 0) {
         maxVol = 0.2 * units::ml;
         type = VirtualContainer::well;
-    } else if (capStr.compare(WELL_PLATE_192_STR) == 0) {
+    } else if (typeStr.compare(WELL_PLATE_192_STR) == 0) {
         maxVol = 0.2 * units::ml;
         type = VirtualContainer::well;
-    } else if (capStr.compare(BEAKER_150_ML_STR) == 0) {
+    } else if (typeStr.compare(BEAKER_150_ML_STR) == 0) {
         maxVol = 150.0 * units::ml;
         type = VirtualContainer::tube;
-    } else if (capStr.compare(FLASK_150_ML_STR) == 0) {
+    } else if (typeStr.compare(FLASK_150_ML_STR) == 0) {
         maxVol = 150.0 * units::ml;
         type = VirtualContainer::tube;
     } else {
-        throw(std::invalid_argument("Unknow conatiner type value : \"" + capStr + "\""));
+        throw(std::invalid_argument("Unknow conatiner type value : \"" + typeStr + "\""));
     }
     return std::make_tuple(maxVol, type);
 }

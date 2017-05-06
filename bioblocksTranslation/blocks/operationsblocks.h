@@ -6,7 +6,6 @@
 #define BIOBLOCKS_ELECTROPHORESIS_STR "electrophoresis"
 #define BIOBLOCKS_INCUBATE_STR "incubate"
 #define BIOBLOCKS_CENTRIFUGATION_STR "centrifugation"
-#define BIOBLOCKS_THERMOCYCLING_STR "thermocycling"
 #define BIOBLOCKS_MEASUREMENT_STR "measurement"
 #define BIOBLOCKS_SANGERSEQUENCING_STR "sangerSequencing"
 #define BIOBLOCKS_OLIGOSYNTHESIZE_STR "oligosynthesize"
@@ -26,6 +25,7 @@
 
 //local
 #include <protocolGraph/ProtocolGraph.h>
+#include <protocolGraph/operables/mathematics/MathematicOperable.h>
 
 #include "bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h"
 
@@ -43,7 +43,7 @@ public:
                      std::shared_ptr<LogicBlocks> logicBlocks);
     virtual ~OperationsBlocks();
 
-    std::vector<int> processBlock(const nlohmann::json & blockObj) throw(std::invalid_argument);
+    std::vector<int> processBlock(const nlohmann::json & blockObj) const throw(std::invalid_argument);
 
     inline std::shared_ptr<ContainerManager> getVCManager() const {
         return vcManager;
@@ -62,20 +62,20 @@ protected:
     std::shared_ptr<MathBlocks> mathBlocks;
     std::shared_ptr<LogicBlocks> logicBlocks;
 
-    std::vector<int> pipetteOperation(const nlohmann::json & pipetteObj) throw(std::invalid_argument);
-    std::vector<int> continuousflowOperation(const nlohmann::json & continuousflowObj) throw(std::invalid_argument);
-    int electrophoresisOperation(const nlohmann::json & electrophoresisObj) throw(std::invalid_argument);
-    std::vector<int> incubateOperation(const nlohmann::json & incubateObj) throw(std::invalid_argument);
-    std::vector<int> centrifugationOperation(const nlohmann::json & centrifugationObj) throw(std::invalid_argument);
-    int measurementOperation(const nlohmann::json & measurementObj) throw(std::invalid_argument);
-    int sangerSequencingOperation(const nlohmann::json & sangerSequencingObj) throw(std::invalid_argument);
-    int oligosynthesizeOperation(const nlohmann::json & oligosynthesizeObj) throw(std::invalid_argument);
-    int colonyPickingOperation(const nlohmann::json & colonyPickingObj) throw(std::invalid_argument);
-    int cellSpreadingOperation(const nlohmann::json & cellSpreadingObj) throw(std::invalid_argument);
-    int flashFreezeOperation(const nlohmann::json & flashFreezeObj) throw(std::invalid_argument);
-    int mixOperation(const nlohmann::json & mixObj) throw(std::invalid_argument);
-    int turbidostatOperation(const nlohmann::json & turObj) throw(std::invalid_argument);
-    int flowCitometryOperation(const nlohmann::json & mixObj) throw(std::invalid_argument);
+    std::vector<int> pipetteOperation(const nlohmann::json & pipetteObj) const throw(std::invalid_argument);
+    std::vector<int> continuousflowOperation(const nlohmann::json & continuousflowObj) const throw(std::invalid_argument);
+    int electrophoresisOperation(const nlohmann::json & electrophoresisObj) const throw(std::invalid_argument);
+    std::vector<int> incubateOperation(const nlohmann::json & incubateObj) const throw(std::invalid_argument);
+    std::vector<int> centrifugationOperation(const nlohmann::json & centrifugationObj) const throw(std::invalid_argument);
+    int measurementOperation(const nlohmann::json & measurementObj) const throw(std::invalid_argument);
+    int sangerSequencingOperation(const nlohmann::json & sangerSequencingObj) const throw(std::invalid_argument);
+    int oligosynthesizeOperation(const nlohmann::json & oligosynthesizeObj) const throw(std::invalid_argument);
+    int colonyPickingOperation(const nlohmann::json & colonyPickingObj) const throw(std::invalid_argument);
+    int cellSpreadingOperation(const nlohmann::json & cellSpreadingObj) const throw(std::invalid_argument);
+    int flashFreezeOperation(const nlohmann::json & flashFreezeObj) const throw(std::invalid_argument);
+    int mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument);
+    int turbidostatOperation(const nlohmann::json & turObj) const throw(std::invalid_argument);
+    int flowCitometryOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument);
 };
 
 #endif // OPERATIONSBLOCKS_H

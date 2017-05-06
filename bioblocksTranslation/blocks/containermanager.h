@@ -14,14 +14,14 @@
 #define DISCARD_CHEMICAL_WASTE_STR "Chemical-Waste"
 #define DISCARD_REGULAR_WASTE_STR "Regular-Waste"
 
-#define EPPENDORF_TUBE_2_ML_STR 1
-#define EPPENDORF_TUBE_6_ML_STR 2
-#define AGAROSE_GEL_STR 201
-#define PETRI_DISH_STR 202
-#define WELL_PLATE_96_STR 301
-#define WELL_PLATE_192_STR 302
-#define BEAKER_150_ML_STR 4
-#define FLASK_150_ML_STR 5
+#define EPPENDORF_TUBE_2_ML_STR "1"
+#define EPPENDORF_TUBE_6_ML_STR "2"
+#define AGAROSE_GEL_STR "201"
+#define PETRI_DISH_STR "202"
+#define WELL_PLATE_96_STR "301"
+#define WELL_PLATE_192_STR "302"
+#define BEAKER_150_ML_STR "4"
+#define FLASK_150_ML_STR "5"
 
 #include <memory>
 #include <stdexcept>
