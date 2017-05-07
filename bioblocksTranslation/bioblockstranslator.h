@@ -37,7 +37,9 @@
 
 #include "bioblocksTranslation/interfaces/translationinterface.h"
 
-class BioBlocksTranslator : public TranslationInterface
+#include "bioblocksTranslation/bioblockstranslator_global.h"
+
+class BIOBLOCKSTRANSLATORSHARED_EXPORT BioBlocksTranslator : public TranslationInterface
 {
 public:
     BioBlocksTranslator();
@@ -55,6 +57,7 @@ protected:
     AutoEnumerate logicSerial;
     std::shared_ptr<BlockPOJOInterface> lastBlockProcess;
     std::shared_ptr<MathematicOperable> protocolEndTime;
+    std::shared_ptr<MathematicOperable> timeSlice;
 
     void makeProtocolGraph();
     void setTimeStep();
@@ -63,32 +66,32 @@ protected:
     void processLinkedBlocks(nlohmann::json blockObj,
                              const OperationsBlocks & blocksTrans,
                              std::shared_ptr<MathematicOperable> initTime = NULL,
-                             std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                             std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void thermocyclingOperation(const nlohmann::json & thermocyclingObj,
                                 const OperationsBlocks & blocksTrans,
                                 std::shared_ptr<MathematicOperable> initTime = NULL,
-                                std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                                std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void variablesSet(const nlohmann::json & variableSetObj,
                       const OperationsBlocks & blocksTrans,
                       std::shared_ptr<MathematicOperable> initTime,
-                      std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                      std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void bioblocksIfOperation(const nlohmann::json & bioblocksIfObj,
                               const OperationsBlocks & blocksTrans,
                               std::shared_ptr<MathematicOperable> initTime = NULL,
-                              std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                              std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void bioblocksWhileOperation(const nlohmann::json & bioblocksWhileObj,
                                  const OperationsBlocks & blocksTrans,
                                  std::shared_ptr<MathematicOperable> initTime = NULL,
-                                 std::shared_ptr<VariableEntry> endIfVar = NULL) throw(std::invalid_argument);
+                                 std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void processBioBlocksOp(const nlohmann::json & bioblocksObj,
                             const OperationsBlocks & blocksTrans,
                             std::shared_ptr<MathematicOperable> initTime = NULL,
-                            std::shared_ptr<VariableEntry> endIfVar = NULL);
+                            std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{});
 
     void initializeVarToInfinite(const std::string & name);
     void initializeVarToZero(const std::string & name);

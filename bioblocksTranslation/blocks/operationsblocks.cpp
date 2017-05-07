@@ -74,7 +74,8 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
         std::vector<std::string> sourceContainers = vcManager->processContainerBlock(pipetteObj["source"]);
         std::vector<std::string> destinationContainers = vcManager->processContainerBlock(pipetteObj["destination"]);
 
-        int pipetteType = (int)(pipetteObj["pipetteTypeName"]);
+        std::string pippeteTypeStr = pipetteObj["pipetteTypeName"];
+        int pipetteType = std::stoi(pippeteTypeStr);
         switch (pipetteType) {
         case 1: {//one to one
             ContainerManager::VolumeMap volumeMap = vcManager->extractVolume(pipetteObj["destination"]);
@@ -131,7 +132,8 @@ std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json 
         std::vector<std::string> sourceContainers = vcManager->processContainerBlock(continuousflowObj["source"]);
         std::vector<std::string> destinationContainers = vcManager->processContainerBlock(continuousflowObj["destination"]);
 
-        int flowType = (int)(continuousflowObj["continuosflow_type"]);
+        std::string flowTypeStr = continuousflowObj["continuosflow_type"];
+        int flowType = std::stoi(flowTypeStr);
         switch (flowType) {
         case 1: {//one to one
             ContainerManager::RateMap rateMap = vcManager->extractRate(continuousflowObj["destination"]);
@@ -272,7 +274,8 @@ int OperationsBlocks::measurementOperation(const nlohmann::json & measurementObj
                                                         (mathBlocks->translateMathBlock(measurementObj["data_reference"]));
 
         int opId = -1;
-        int measureType = (int)(measurementObj["measurement_type"]);
+        std::string typeStr = measurementObj["measurement_type"];
+        int measureType = std::stoi(typeStr);
         switch (measureType) {
         case 1: { //absorbance
             BlocksUtils::checkPropertiesExists(std::vector<std::string>{"wavelengthnum","wavelengthnum_units"}, measurementObj);
@@ -358,7 +361,8 @@ int OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(st
         units::Frequency speedUnits = BlocksUtils::getFrequencyUnits(mixObj["mix_speed_units"]);
 
         int opId = -1;
-        int mixType = (int)(mixObj["type"]);
+        std::string mixStr = mixObj["type"];
+        int mixType = std::stoi(mixStr);
         switch (mixType) {
         case 1: { //vortex
             opId = graphPtr->emplaceStir(sourceContainer, speed, speedUnits);

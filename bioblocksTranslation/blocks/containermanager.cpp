@@ -73,7 +73,8 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"steps"}, containerObj);
         PCRStepVector steps;
 
-        int stepsNum = (int)(containerObj["steps"]);
+        std::string stepsStr = containerObj["steps"];
+        int stepsNum = std::stoi(stepsStr);
         for(int i = 0; i < stepsNum; i++) {
             BlocksUtils::checkPropertiesExists(std::vector<std::string>{
                                                "temperature" + std::to_string(i),
@@ -82,12 +83,15 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
                                                "duration_units" + std::to_string(i)}, containerObj);
 
             units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units"]);
-            double temperature = (double)(containerObj["temperature"]);
+            std::string tempStr = containerObj["temperature"];
+            double temperature = std::stof(tempStr);
 
             units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units"]);
-            int duration = (int)(containerObj["duration"]);
+            std::string durationStr =  containerObj["duration"];
+            int duration = std::stoi(durationStr);
 
-            steps.push_back(std::make_tuple(temperature*temperatureUnits, duration*durationUnits));
+            steps.push_back(std::make_tuple(std::make_tuple(temperature, temperatureUnits),
+                                            std::make_tuple(duration , durationUnits)));
         }
         return steps;
     } catch (std::invalid_argument & e) {
@@ -171,12 +175,13 @@ std::string ContainerManager::processSingleContainer(const nlohmann::json & cont
             units::Volume initialVolume = -1 * units::ml;
             if (std::get<1>(typeTuple) == VirtualContainer::tube) {
                 BlocksUtils::checkPropertiesExists(std::vector<std::string>{"initialVolume","initialVolumeUnits"}, containerObj);
-                initialVolume = (double)(containerObj["initialVolume"]) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
+
+                std::string initialVolStr = containerObj["initialVolume"];
+                initialVolume = std::stod(initialVolStr) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
             }
             protocolPtr->addVContainer(name, std::get<1>(typeTuple),std::get<0>(typeTuple),initialVolume, store);
-
-            return name;
         }
+        return name;
     } catch (std::invalid_argument & e) {
         throw(std::invalid_argument("ContainerManager::processSingleContainer." + std::string(e.what())));
     }

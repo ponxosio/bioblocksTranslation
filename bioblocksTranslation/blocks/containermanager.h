@@ -41,7 +41,10 @@
 class ContainerManager
 {
 public:
-    typedef std::tuple<units::Temperature, units::Time> PCRStepTuple;
+    typedef std::tuple<double, units::Temperature> TemperatureTuple;
+    typedef std::tuple<double, units::Time> TimeTuple;
+    typedef std::tuple<TemperatureTuple, TimeTuple> PCRStepTuple;
+
     typedef std::tuple<std::shared_ptr<MathematicOperable>, units::Volume>  VolumeTuple;
     typedef std::tuple<std::shared_ptr<MathematicOperable>, units::Volumetric_Flow>  RateTuple;
 

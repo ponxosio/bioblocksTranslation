@@ -27,7 +27,7 @@ public:
     IfBlockPOJO(int id,
                 std::shared_ptr<MathematicOperable> initTime,
                 std::shared_ptr<VariableEntry> endIfVar,
-                std::shared_ptr<VariableEntry> otherIfEnds,
+                std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
                 std::shared_ptr<VariableEntry> elseVar = NULL);
 
     virtual ~IfBlockPOJO();
@@ -38,10 +38,6 @@ public:
 
     inline const std::vector<BranchTuple> & getBranches() const {
         return branchesVector;
-    }
-
-    inline std::shared_ptr<VariableEntry> getOtherIfEnds() const {
-        return otherIfEnds;
     }
 
     inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
@@ -61,7 +57,7 @@ protected:
     std::shared_ptr<VariableEntry> elseVar;
     std::shared_ptr<MathematicOperable> initTime;
     std::shared_ptr<VariableEntry> endIfVar;
-    std::shared_ptr<VariableEntry> otherIfEnds;
+    std::vector<std::shared_ptr<VariableEntry>> otherIfEnds;
 };
 
 #endif // IFBLOCKPOJO_H

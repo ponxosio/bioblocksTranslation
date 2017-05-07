@@ -1,7 +1,7 @@
 #ifndef MATHBLOCKS_H
 #define MATHBLOCKS_H
 
-#define MATH_NUMBER_STR "math_numbeR "
+#define MATH_NUMBER_STR "math_number"
 #define MATH_ARITHMETIC_STR "math_arithmetic"
 #define MATH_SINGLE_STR "math_single"
 #define MATH_TRIG_STR "math_trig"

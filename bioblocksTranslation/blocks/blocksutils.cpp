@@ -109,15 +109,18 @@ void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & 
     try {
         checkPropertiesExists(std::vector<std::string>{"timeOfOperation", "timeOfOperation_units"}, objJSON);
 
-        initT = (double)(objJSON["timeOfOperation"]) * getTimeUnits("timeOfOperation_units");
+        std::string timeStr = objJSON["timeOfOperation"];
+        initT = std::stof(timeStr) * getTimeUnits(objJSON["timeOfOperation_units"]);
 
         if (!objJSON["duration"].is_null()) {
             checkPropertiesExists(std::vector<std::string>{"duration_units"}, objJSON);
-            duration = (double)(objJSON["duration"]) * getTimeUnits("duration_units");
+
+            std::string durationStr = objJSON["duration"];
+            duration = std::stof(durationStr) * getTimeUnits(objJSON["duration_units"]);
         } else {
             duration = -1*units::s;
         }
-    } catch (std::invalid_argument & e) {
+    } catch (std::exception & e) {
         throw(std::invalid_argument("BlocksUtils::fillTimeSetting. " + std::string(e.what())));
     }
 }

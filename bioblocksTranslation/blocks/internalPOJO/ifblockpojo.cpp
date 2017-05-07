@@ -7,17 +7,15 @@ IfBlockPOJO::IfBlockPOJO() {
     this->id = -1;
     this->initTime = NULL;
     this->endIfVar = NULL;
-    this->otherIfEnds = NULL;
     this->elseVar = NULL;
 }
 
 IfBlockPOJO::IfBlockPOJO(const IfBlockPOJO & obj) :
-    branchesVector(obj.branchesVector)
+    branchesVector(obj.branchesVector), otherIfEnds(obj.otherIfEnds)
 {
     this->id = obj.id;
     this->initTime = obj.initTime;
     this->endIfVar = obj.endIfVar;
-    this->otherIfEnds = obj.otherIfEnds;
     this->elseVar = obj.elseVar;
 }
 
@@ -25,13 +23,13 @@ IfBlockPOJO::IfBlockPOJO(
         int id,
         std::shared_ptr<MathematicOperable> initTime,
         std::shared_ptr<VariableEntry> endIfVar,
-        std::shared_ptr<VariableEntry> otherIfEnds,
-        std::shared_ptr<VariableEntry> elseVar)
+        std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
+        std::shared_ptr<VariableEntry> elseVar) :
+    otherIfEnds(otherIfEnds)
 {
     this->id = id;
     this->initTime = initTime;
     this->endIfVar = endIfVar;
-    this->otherIfEnds = otherIfEnds;
     this->elseVar = elseVar;
 }
 
@@ -72,10 +70,18 @@ void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphP
         ++it;
     }
 
+    graphPtr->startElseBlock();
     if (elseVar != NULL) {
         int setElseTrigerred = graphPtr->emplaceAssignation(elseVar->toString(), timeVar);
-        graphPtr->startElseBlock();
         graphPtr->appendOperations(setElseTrigerred);
+    } else {
+        int setEnfIfTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
+        graphPtr->appendOperations(setEnfIfTime);
+
+        for(std::shared_ptr<VariableEntry> otherIf : otherIfEnds) {
+            int setOtherIfEndTime = graphPtr->emplaceAssignation(otherIf->toString(), timeVar);
+            graphPtr->appendOperations(setOtherIfEndTime);
+        }
     }
     graphPtr->endIfBlock();
     graphPtr->endIfBlock();

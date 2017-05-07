@@ -23,11 +23,11 @@ public:
     BioBlocksOpPOJO(int opId,
                     std::shared_ptr<MathematicOperable> duration,
                     std::shared_ptr<MathematicOperable> initTime,
-                    std::shared_ptr<VariableEntry> endIfVar = NULL);
+                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{});
     BioBlocksOpPOJO(std::vector<int> opIds,
                     std::shared_ptr<MathematicOperable> duration,
                     std::shared_ptr<MathematicOperable> initTime,
-                    std::shared_ptr<VariableEntry> endIfVar = NULL);
+                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{});
 
     virtual ~BioBlocksOpPOJO();
 
@@ -47,17 +47,13 @@ public:
         return MF::add(initTime,duration);
     }
 
-    inline std::shared_ptr<VariableEntry> getEndIfVar() const {
-        return endIfVar;
-    }
-
     virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
 
 protected:
     std::vector<int> opIds;
     std::shared_ptr<MathematicOperable> duration;
     std::shared_ptr<MathematicOperable> initTime;
-    std::shared_ptr<VariableEntry> endIfVar;
+    std::vector<std::shared_ptr<VariableEntry>> endIfVector;
 
 
 };

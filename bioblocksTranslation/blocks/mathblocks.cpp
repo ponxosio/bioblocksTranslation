@@ -22,33 +22,33 @@ std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohman
 
         std::shared_ptr<MathematicOperable> op = NULL;
         if(opStr.compare(MATH_NUMBER_STR) == 0) {
-            mathNumberOperation(mathJSONObj);
+            op = mathNumberOperation(mathJSONObj);
         } else if (opStr.compare(MATH_ARITHMETIC_STR) == 0) {
-            mathArithmeticOperation(mathJSONObj);
+            op = mathArithmeticOperation(mathJSONObj);
         } else if (opStr.compare(MATH_SINGLE_STR) == 0) {
-            mathSingleOperation(mathJSONObj);
+            op = mathSingleOperation(mathJSONObj);
         } else if (opStr.compare(MATH_TRIG_STR) == 0) {
-            mathSingleOperation(mathJSONObj);
+            op = mathSingleOperation(mathJSONObj);
         } else if (opStr.compare(MATH_CONSTANT_STR) == 0) {
-            mathConstantOperation(mathJSONObj);
+            op = mathConstantOperation(mathJSONObj);
         } else if (opStr.compare(MATH_ROUND_STR) == 0) {
-            mathSingleOperation(mathJSONObj);
+            op = mathSingleOperation(mathJSONObj);
         } else if (opStr.compare(MATH_ON_LIST_STR) == 0) {
-            mathOnListOperation(mathJSONObj);
+            op = mathOnListOperation(mathJSONObj);
         } else if (opStr.compare(MATH_MODULO_STR) == 0) {
-            mathModuloOperation(mathJSONObj);
+            op = mathModuloOperation(mathJSONObj);
         } else if (opStr.compare(MATH_CONSTRAIN_STR) == 0) {
-            mathConstrainOperation(mathJSONObj);
+            op = mathConstrainOperation(mathJSONObj);
         } else if (opStr.compare(MATH_RANDOM_INT_STR) == 0) {
-            mathRandomIntOperation(mathJSONObj);
+            op = mathRandomIntOperation(mathJSONObj);
         } else if (opStr.compare(MATH_RANDOM_FLOAT_STR) == 0) {
-            mathRandomFloatOperation();
+            op = mathRandomFloatOperation();
         } else if (opStr.compare(VARIABLES_GET_STR) == 0) {
-            variableGetOperation(mathJSONObj);
+            op = variableGetOperation(mathJSONObj);
         } else if (opStr.compare(LOGICTERNARY_STR) == 0) {
-            logicTernaryOperation(mathJSONObj);
+            op = logicTernaryOperation(mathJSONObj);
         } else {
-            throw(std::invalid_argument("MathBlocks::getBlockType. Unknow type " + opStr));
+            throw(std::invalid_argument("MathBlocks::translateMathBlock. Unknow type " + opStr));
         }
 
         return op;

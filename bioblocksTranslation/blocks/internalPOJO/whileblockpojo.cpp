@@ -9,7 +9,6 @@ WhileBlockPOJO::WhileBlockPOJO() {
     this->initTime = NULL;
     this->initVar = NULL;
     this->endVar = NULL;
-    this->endIfVar = NULL;
 }
 
 WhileBlockPOJO::WhileBlockPOJO(const WhileBlockPOJO & obj) {
@@ -18,7 +17,6 @@ WhileBlockPOJO::WhileBlockPOJO(const WhileBlockPOJO & obj) {
     this->initTime = obj.initTime;
     this->initVar = obj.initVar;
     this->endVar = obj.endVar;
-    this->endIfVar = obj.endIfVar;
 }
 
 WhileBlockPOJO::WhileBlockPOJO(
@@ -27,14 +25,14 @@ WhileBlockPOJO::WhileBlockPOJO(
         std::shared_ptr<MathematicOperable> initTime,
         std::shared_ptr<VariableEntry> initVar,
         std::shared_ptr<VariableEntry> endVar,
-        std::shared_ptr<VariableEntry> endIfVar)
+        std::vector<std::shared_ptr<VariableEntry>> endIfVector) :
+    endIfVector(endIfVector)
 {
     this->id = id;
     this->condition = condition;
     this->initTime = initTime;
     this->initVar = initVar;
     this->endVar = endVar;
-    this->endIfVar = endIfVar;
 }
 
 WhileBlockPOJO::~WhileBlockPOJO() {
@@ -56,7 +54,7 @@ void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gra
     int setEndWhileTime = graphPtr->emplaceAssignation(endVar->toString(), timeVar);
     graphPtr->appendOperations(setEndWhileTime);
 
-    if (endIfVar != NULL) {
+    for(const auto & endIfVar : endIfVector) {
         int setOtherIfEndTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
         graphPtr->appendOperations(setOtherIfEndTime);
     }
