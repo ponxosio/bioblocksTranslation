@@ -29,9 +29,9 @@ CpuBlockPOJO::~CpuBlockPOJO(){
 
 }
 
-void CpuBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const {
+void CpuBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
     std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
-    std::shared_ptr<ComparisonOperable> timeCondition = BF::bigEq(timeVar, initTime);
+    std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar, initTime);
 
     std::string executingFlagName = BlocksUtils::generateExecutingVar(std::vector<int>{opId});
     std::shared_ptr<MathematicOperable> executingFlag = graphPtr->getVariable(executingFlagName);

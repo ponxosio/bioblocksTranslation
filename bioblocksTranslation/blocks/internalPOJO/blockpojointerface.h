@@ -12,7 +12,7 @@ public:
     virtual ~BlockPOJOInterface(){}
 
     virtual std::shared_ptr<MathematicOperable> getEndVariable() const = 0;
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const = 0;
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) = 0;
 };
 
 #endif // BLOCKPOJOINTERFACE_H

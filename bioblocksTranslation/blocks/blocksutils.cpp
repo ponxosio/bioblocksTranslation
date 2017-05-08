@@ -7,10 +7,14 @@ using json = nlohmann::json;
 
 void BlocksUtils::checkPropertiesExists(const std::vector<std::string> & properties, const nlohmann::json & objJSON) throw(std::invalid_argument) {
     for(const std::string & property : properties) {
-        if (objJSON[property].is_null()) {
+        if (!hasProperty(property, objJSON)) {
             throw(std::invalid_argument(generateNoPropertyErrorMsg(objJSON, property)));
         }
     }
+}
+
+bool BlocksUtils::hasProperty(const std::string & property, const nlohmann::json & objJSON) {
+    return (objJSON.find(property) != objJSON.end());
 }
 
 std::string BlocksUtils::generateNoPropertyErrorMsg(const nlohmann::json & objJSON, const std::string & property) {
@@ -112,7 +116,7 @@ void BlocksUtils::fillTimeSetting(const nlohmann::json & objJSON, units::Time & 
         std::string timeStr = objJSON["timeOfOperation"];
         initT = std::stof(timeStr) * getTimeUnits(objJSON["timeOfOperation_units"]);
 
-        if (!objJSON["duration"].is_null()) {
+        if (hasProperty("duration", objJSON)) {
             checkPropertiesExists(std::vector<std::string>{"duration_units"}, objJSON);
 
             std::string durationStr = objJSON["duration"];
@@ -165,6 +169,19 @@ std::string BlocksUtils::generateExecutingVar(const std::vector<int> & ops) {
         stream << op;
     }
     return stream.str();
+}
+
+std::shared_ptr<ComparisonOperable> BlocksUtils::makeTimeCondition(
+        std::shared_ptr<MathematicOperable> timeVar,
+        std::shared_ptr<MathematicOperable> initTime,
+        std::shared_ptr<MathematicOperable> endTime)
+{
+    std::shared_ptr<ComparisonOperable> timeBig = BF::bigEq(timeVar, initTime);
+    std::shared_ptr<ComparisonOperable> timeLess = NULL;
+    if (endTime != NULL) {
+        timeLess = BF::less(timeVar, endTime);
+    }
+    return BF::makeAnd(timeBig, timeLess);
 }
 
 

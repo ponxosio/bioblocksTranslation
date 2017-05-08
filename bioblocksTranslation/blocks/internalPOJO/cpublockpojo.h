@@ -33,7 +33,7 @@ public:
         return initTime;
     }
 
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);
 
 protected:
     int opId;

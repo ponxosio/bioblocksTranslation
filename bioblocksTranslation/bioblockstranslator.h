@@ -3,8 +3,8 @@
 
 #define BIOBLOCKS_VARIABLE_SET_STR "variables_set"
 
-#define BIOBLOCKS_IF_STR "bioblocks_if"
-#define BIOBLOCKS_WHILE_STR "bioblocks_while"
+#define BIOBLOCKS_IF_STR "controls_if"
+#define BIOBLOCKS_WHILE_STR "controls_whileUntil"
 #define BIOBLOCKS_THERMOCYCLING_STR "thermocycling"
 
 #include <fstream>
@@ -42,17 +42,20 @@
 class BIOBLOCKSTRANSLATORSHARED_EXPORT BioBlocksTranslator : public TranslationInterface
 {
 public:
-    BioBlocksTranslator();
+    BioBlocksTranslator(units::Time timeSlice, const std::string & jsonFilepath);
     virtual ~BioBlocksTranslator();
 
-    virtual std::shared_ptr<ProtocolGraph> translateFile(const std::string & path) throw(std::invalid_argument);
+    virtual std::shared_ptr<ProtocolGraph> translateFile() throw(std::invalid_argument);
 
 protected:
+    std::string filePath;
+    units::Time timeSliceValue;
     std::shared_ptr<ProtocolGraph> ptrGraph;
 
     std::vector<int> initializationOps;
     std::vector<std::shared_ptr<BlockPOJOInterface>> blocksOps;
-    std::vector<std::shared_ptr<BlockPOJOInterface>> logicOps;
+    std::vector<std::shared_ptr<BlockPOJOInterface>> linkedlogicOps;
+    std::vector<std::shared_ptr<BlockPOJOInterface>> freelogicOps;
 
     AutoEnumerate logicSerial;
     std::shared_ptr<BlockPOJOInterface> lastBlockProcess;
@@ -67,6 +70,11 @@ protected:
                              const OperationsBlocks & blocksTrans,
                              std::shared_ptr<MathematicOperable> initTime = NULL,
                              std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
+
+    void processBlock(nlohmann::json blockObj,
+                      const OperationsBlocks & blocksTrans,
+                      std::shared_ptr<MathematicOperable> initTime = NULL,
+                      std::vector<std::shared_ptr<VariableEntry>> endIfVar = std::vector<std::shared_ptr<VariableEntry>>{}) throw(std::invalid_argument);
 
     void thermocyclingOperation(const nlohmann::json & thermocyclingObj,
                                 const OperationsBlocks & blocksTrans,

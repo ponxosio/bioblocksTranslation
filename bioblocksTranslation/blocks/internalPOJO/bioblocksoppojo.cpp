@@ -44,20 +44,14 @@ BioBlocksOpPOJO::~BioBlocksOpPOJO(){
 
 }
 
-void BioBlocksOpPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const {
+void BioBlocksOpPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
     std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
-    std::shared_ptr<ComparisonOperable> timeCondition = BF::makeAnd(BF::bigEq(timeVar, initTime),BF::less(timeVar, getEndVariable()));
+    std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar, initTime, getEndVariable());
 
     std::string executingFlagName = BlocksUtils::generateExecutingVar(opIds);
     std::shared_ptr<MathematicOperable> executingFlag = graphPtr->getVariable(executingFlagName);
     std::shared_ptr<ComparisonOperable> notExecuting = BF::equal(executingFlag, MF::getNum(0));
     std::shared_ptr<ComparisonOperable> executing = BF::equal(executingFlag, MF::getNum(1));
-
-    std::vector<int> finishOpIds;
-    for(int op: opIds) {
-        int finishOp = graphPtr->emplaceFinishOperation(op);
-        finishOpIds.push_back(finishOp);
-    }
 
     int setExecutingFlag = graphPtr->emplaceAssignation(executingFlagName, MF::getNum(1));
     int unsetExecutingFlag = graphPtr->emplaceAssignation(executingFlagName, MF::getNum(0));
@@ -66,12 +60,22 @@ void BioBlocksOpPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gr
 
     graphPtr->startIfBlock(notExecuting);
     graphPtr->appendOperations(setExecutingFlag);
-    graphPtr->appendOperations(opIds);
+
+    std::vector<int> finishOpIds;
+    for(int op: opIds) {
+        int finishOp = graphPtr->emplaceFinishOperation(op);
+        finishOpIds.push_back(finishOp);
+        graphPtr->appendOperations(op);
+    }
+
     graphPtr->endIfBlock();
 
     graphPtr->startElIfBlock(executing);
     graphPtr->appendOperations(unsetExecutingFlag);
-    graphPtr->appendOperations(finishOpIds);
+
+    for(int op: finishOpIds) {
+        graphPtr->appendOperations(op);
+    }
 
     if (!endIfVector.empty()) {
         for(const std::shared_ptr<VariableEntry> & endIfVar : endIfVector) {

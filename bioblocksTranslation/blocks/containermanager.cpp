@@ -12,7 +12,7 @@ ContainerManager::~ContainerManager() {
 }
 
 std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(!containerObj["block_type"].is_null()) {
+    if(BlocksUtils::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         std::vector<std::string> containerList;
@@ -31,7 +31,7 @@ std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann:
 }
 
 ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(!containerObj["block_type"].is_null()) {
+    if(BlocksUtils::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         VolumeMap volumeList;
@@ -50,7 +50,7 @@ ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::jso
 }
 
 ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(!containerObj["block_type"].is_null()) {
+    if(BlocksUtils::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         RateMap rateList;

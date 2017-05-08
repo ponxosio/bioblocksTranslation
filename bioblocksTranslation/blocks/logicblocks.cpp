@@ -17,7 +17,7 @@ LogicBlocks::~LogicBlocks() {
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::translateLogicBlock(const nlohmann::json & logicJSONObj)  throw(std::invalid_argument) {
-    if(!logicJSONObj["block_type"].is_null()) {
+    if(BlocksUtils::hasProperty("block_type", logicJSONObj)) {
         std::shared_ptr<ComparisonOperable> translatedBlock = NULL;
 
         std::string opStr = logicJSONObj["block_type"];
@@ -72,7 +72,7 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::logicOperationOperation(const n
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicNegateOperation(const nlohmann::json & logicNegateObj) throw(std::invalid_argument) {
-    if (!logicNegateObj["bool"].is_null()) {
+    if (BlocksUtils::hasProperty("bool", logicNegateObj)) {
         std::shared_ptr<ComparisonOperable> boolPtr(translateLogicBlock(logicNegateObj["bool"])->clone());
         boolPtr->negate();
         return boolPtr;
@@ -83,7 +83,7 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::logicNegateOperation(const nloh
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicBooleanOperation(const nlohmann::json & logicBooleanObj) throw(std::invalid_argument) {
-    if (!logicBooleanObj["value"].is_null()) {
+    if (BlocksUtils::hasProperty("value", logicBooleanObj)) {
         return getBoolConstant(logicBooleanObj["value"]);
     } else {
         throw(std::invalid_argument("LogicBlocks::logicBooleanOperation." +

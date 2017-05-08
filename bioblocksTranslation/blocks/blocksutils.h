@@ -24,7 +24,7 @@
 #define UNITS_TEMPERATURE_C "c"
 #define UNITS_TEMPERATURE_K "k"
 
-#define UNITS_ELECTRICPOTENTIAL_V "V"
+#define UNITS_ELECTRICPOTENTIAL_V "v"
 
 #include <memory>
 #include <sstream>
@@ -48,6 +48,8 @@ class BlocksUtils
 {
 public:
     static void checkPropertiesExists(const std::vector<std::string> & properties, const nlohmann::json & objJSON) throw(std::invalid_argument);
+    static bool hasProperty(const std::string & property, const nlohmann::json & objJSON);
+
     static std::string generateNoPropertyErrorMsg(const nlohmann::json & objJSON, const std::string & property);
     static std::string jsonObjToStr(const nlohmann::json & objJSON);
 
@@ -72,6 +74,10 @@ public:
     static std::string generateEndWhileVar(int op);
 
     static std::string generateExecutingVar(const std::vector<int> & ops);
+
+    static std::shared_ptr<ComparisonOperable> makeTimeCondition(std::shared_ptr<MathematicOperable> timeVar,
+                                                                 std::shared_ptr<MathematicOperable> initTime,
+                                                                 std::shared_ptr<MathematicOperable> endTime = NULL);
 
     virtual ~BlocksUtils(){}
 private:

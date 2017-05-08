@@ -39,9 +39,9 @@ WhileBlockPOJO::~WhileBlockPOJO() {
 
 }
 
-void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const {
+void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
     std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
-    std::shared_ptr<ComparisonOperable> timeCondition = BF::makeAnd(BF::bigEq(timeVar, initTime),BF::lessEq(timeVar, getEndVariable()));
+    std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar, initVar, getEndVariable());
 
     graphPtr->startIfBlock(timeCondition);
     graphPtr->startIfBlock(condition);

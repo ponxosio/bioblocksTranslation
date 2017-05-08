@@ -47,7 +47,7 @@ public:
         return MF::add(initTime,duration);
     }
 
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);
 
 protected:
     std::vector<int> opIds;

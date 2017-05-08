@@ -12,7 +12,7 @@ class TranslationInterface
 public:
     virtual ~TranslationInterface(){}
 
-    virtual std::shared_ptr<ProtocolGraph> translateFile(const std::string & path) = 0;
+    virtual std::shared_ptr<ProtocolGraph> translateFile() = 0;
 };
 
 #endif // TRANSLATIONINTERFACE_H

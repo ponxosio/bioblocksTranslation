@@ -17,7 +17,7 @@ MathBlocks::~MathBlocks() {
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohmann::json & mathJSONObj) throw(std::invalid_argument) {
-    if(!mathJSONObj["block_type"].is_null()) {
+    if(BlocksUtils::hasProperty("block_type", mathJSONObj)) {
         std::string opStr = mathJSONObj["block_type"];
 
         std::shared_ptr<MathematicOperable> op = NULL;
@@ -58,7 +58,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohman
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathNumberOperation(const json & mathNumberObj) throw(std::invalid_argument) {
-    if(!mathNumberObj["value"].is_null()) {
+    if(BlocksUtils::hasProperty("value", mathNumberObj)) {
         std::string valueStr = mathNumberObj["value"];
         double value = std::atof(valueStr.c_str());
         return MF::getNum(value);
@@ -93,7 +93,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathSingleOperation(const json &
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathConstantOperation(const json & constantOperationObj) throw(std::invalid_argument) {
-    if(!constantOperationObj["constant"].is_null()) {
+    if(BlocksUtils::hasProperty("constant", constantOperationObj)) {
         std::string valueStr = constantOperationObj["constant"];
         double value = getNumericConstant(valueStr);
         return MF::getNum(value);
@@ -166,7 +166,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::logicTernaryOperation(const json
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::variableGetOperation(const nlohmann::json & variableGetObj) throw(std::invalid_argument) {
-    if(!variableGetObj["variable"].is_null()) {
+    if(BlocksUtils::hasProperty("variable", variableGetObj)) {
         std::string valueStr = variableGetObj["variable"];
         return protocolPtr->getVariable(valueStr);
     } else {

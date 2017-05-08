@@ -37,54 +37,58 @@ IfBlockPOJO::~IfBlockPOJO() {
 
 }
 
-void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const {
-    std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
-    std::shared_ptr<ComparisonOperable> timeCondition = BF::bigEq(timeVar, initTime);
+void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
+    if (!branchesVector.empty()) {
+        std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
+        std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar,initTime);
 
-    std::string triggeredFlagName = BlocksUtils::generateTrigerredIfFlagVar(id);
-    std::shared_ptr<MathematicOperable> triggeredFlag = graphPtr->getVariable(triggeredFlagName);
-    std::shared_ptr<ComparisonOperable> notTrigerred = BF::equal(triggeredFlag, MF::getNum(0));
+        std::string triggeredFlagName = BlocksUtils::generateTrigerredIfFlagVar(id);
+        std::shared_ptr<MathematicOperable> triggeredFlag = graphPtr->getVariable(triggeredFlagName);
+        std::shared_ptr<ComparisonOperable> notTrigerred = BF::equal(triggeredFlag, MF::getNum(0));
 
-    int settrigerredFlagOp = graphPtr->emplaceAssignation(triggeredFlagName, MF::getNum(1));
+        int settrigerredFlagOp = graphPtr->emplaceAssignation(triggeredFlagName, MF::getNum(1));
 
-    graphPtr->startIfBlock(BF::makeAnd(timeCondition, notTrigerred));
-    graphPtr->appendOperations(settrigerredFlagOp);
+        graphPtr->startIfBlock(BF::makeAnd(timeCondition, notTrigerred));
+        graphPtr->appendOperations(settrigerredFlagOp);
 
-    auto it = branchesVector.begin();
-    std::shared_ptr<ComparisonOperable> branchCondition = std::get<0>(*it);
-    std::shared_ptr<VariableEntry> branchTrigerred = std::get<1>(*it);
+        auto it = branchesVector.begin();
+        std::shared_ptr<ComparisonOperable> branchCondition = std::get<0>(*it);
+        std::shared_ptr<VariableEntry> branchTrigerred = std::get<1>(*it);
 
-    int setBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
-    graphPtr->startIfBlock(branchCondition);
-    graphPtr->appendOperations(setBranchTrigerred);
-    ++it;
-
-    while (it != branchesVector.end()) {
-        branchCondition = std::get<0>(*it);
-        branchTrigerred = std::get<1>(*it);
-
-        int setActualBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
-        graphPtr->startElIfBlock(branchCondition);
-        graphPtr->appendOperations(setActualBranchTrigerred);
-
+        int setBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
+        graphPtr->startIfBlock(branchCondition);
+        graphPtr->appendOperations(setBranchTrigerred);
         ++it;
-    }
 
-    graphPtr->startElseBlock();
-    if (elseVar != NULL) {
-        int setElseTrigerred = graphPtr->emplaceAssignation(elseVar->toString(), timeVar);
-        graphPtr->appendOperations(setElseTrigerred);
-    } else {
-        int setEnfIfTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
-        graphPtr->appendOperations(setEnfIfTime);
+        while (it != branchesVector.end()) {
+            branchCondition = std::get<0>(*it);
+            branchTrigerred = std::get<1>(*it);
 
-        for(std::shared_ptr<VariableEntry> otherIf : otherIfEnds) {
-            int setOtherIfEndTime = graphPtr->emplaceAssignation(otherIf->toString(), timeVar);
-            graphPtr->appendOperations(setOtherIfEndTime);
+            int setActualBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
+            graphPtr->startElIfBlock(branchCondition);
+            graphPtr->appendOperations(setActualBranchTrigerred);
+
+            ++it;
         }
+
+        graphPtr->startElseBlock();
+        if (elseVar != NULL) {
+            int setElseTrigerred = graphPtr->emplaceAssignation(elseVar->toString(), timeVar);
+            graphPtr->appendOperations(setElseTrigerred);
+        } else {
+            int setEnfIfTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
+            graphPtr->appendOperations(setEnfIfTime);
+
+            for(std::shared_ptr<VariableEntry> otherIf : otherIfEnds) {
+                int setOtherIfEndTime = graphPtr->emplaceAssignation(otherIf->toString(), timeVar);
+                graphPtr->appendOperations(setOtherIfEndTime);
+            }
+        }
+        graphPtr->endIfBlock();
+        graphPtr->endIfBlock();
+    } else {
+        throw(std::runtime_error("IfBlockPOJO::appendOperationsToGraphs. No branches to process"));
     }
-    graphPtr->endIfBlock();
-    graphPtr->endIfBlock();
 }
 
 

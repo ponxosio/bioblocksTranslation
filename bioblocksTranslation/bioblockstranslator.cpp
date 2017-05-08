@@ -5,16 +5,18 @@ typedef ProtocolBoolF BF;
 
 using json = nlohmann::json;
 
-BioBlocksTranslator::BioBlocksTranslator()
+BioBlocksTranslator::BioBlocksTranslator(units::Time timeSlice, const std::string & jsonFilepath) :
+    filePath(jsonFilepath)
 {
-
+    this->timeSliceValue = timeSlice;
 }
+
 BioBlocksTranslator::~BioBlocksTranslator() {
 
-}
+}    
 
-std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(const std::string & path) throw(std::invalid_argument) {
-    std::ifstream in(path);
+std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile() throw(std::invalid_argument) {
+    std::ifstream in(filePath);
     json js;
     try {
         in >> js;
@@ -54,12 +56,16 @@ void BioBlocksTranslator::makeProtocolGraph() {
 
     ptrGraph->startLoopBlock(BF::lessEq(ptrGraph->getTimeVariable(),MF::add(protocolEndTime, timeSlice)));
 
-    for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : logicOps) {
+    for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : freelogicOps) {
         logicBlock->appendOperationsToGraphs(ptrGraph);
     }
 
     for(const std::shared_ptr<BlockPOJOInterface> & opBlock : blocksOps) {
         opBlock->appendOperationsToGraphs(ptrGraph);
+    }
+
+    for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : linkedlogicOps) {
+        logicBlock->appendOperationsToGraphs(ptrGraph);
     }
 
     int timeStep = ptrGraph->emplaceTimeStep();
@@ -70,8 +76,9 @@ void BioBlocksTranslator::makeProtocolGraph() {
 
 void BioBlocksTranslator::setTimeStep() {
     //TODO:
-    int timeStep = ptrGraph->emplaceSetTimeStep(MF::getNum(1), units::s);
-    timeSlice = MF::getNum(1);
+    double value = timeSliceValue.to(units::s);
+    int timeStep = ptrGraph->emplaceSetTimeStep(MF::getNum(value), units::s);
+    timeSlice = MF::getNum(value);
     ptrGraph->setStartNode(timeStep);
 }
 
@@ -80,7 +87,8 @@ void BioBlocksTranslator::resetAttributes(const std::string & protocolName) {
 
     initializationOps.clear();
     blocksOps.clear();
-    logicOps.clear();
+    linkedlogicOps.clear();
+    freelogicOps.clear();
 
     lastBlockProcess = NULL;
     protocolEndTime = MF::getNum(0);
@@ -95,25 +103,34 @@ void BioBlocksTranslator::processLinkedBlocks(
     throw(std::invalid_argument)
 {
     for(json::iterator it = blockObj.begin(); it != blockObj.end(); ++it) {
-        json blockOp = *it;
-        try {
-            BlocksUtils::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockOp);
-            std::string blockType = blockOp["block_type"];
+        processBlock(*it, blocksTrans, initTime, endIfVar);
+    }
+}
 
-            if (blockType.compare(BIOBLOCKS_IF_STR) == 0) {
-                bioblocksIfOperation(blockOp, blocksTrans, initTime, endIfVar);
-            } else if (blockType.compare(BIOBLOCKS_WHILE_STR) == 0) {
-                bioblocksWhileOperation(blockOp, blocksTrans, initTime, endIfVar);
-            } else if (blockType.compare(BIOBLOCKS_VARIABLE_SET_STR) == 0) {
-                variablesSet(blockOp, blocksTrans, initTime, endIfVar);
-            } else if (blockType.compare(BIOBLOCKS_THERMOCYCLING_STR) == 0) {
-                thermocyclingOperation(blockOp, blocksTrans, initTime, endIfVar);
-            } else {
-                processBioBlocksOp(blockOp, blocksTrans, initTime, endIfVar);
-            }
-        } catch (std::invalid_argument & e) {
-            throw(std::invalid_argument("BioBlocksTranslator::processLinkedBlocks. " + std::string(e.what())));
+void BioBlocksTranslator::processBlock(
+        nlohmann::json blockOp,
+        const OperationsBlocks & blocksTrans,
+        std::shared_ptr<MathematicOperable> initTime,
+        std::vector<std::shared_ptr<VariableEntry>> endIfVar)
+    throw(std::invalid_argument)
+{
+    try {
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockOp);
+        std::string blockType = blockOp["block_type"];
+
+        if (blockType.compare(BIOBLOCKS_IF_STR) == 0) {
+            bioblocksIfOperation(blockOp, blocksTrans, initTime, endIfVar);
+        } else if (blockType.compare(BIOBLOCKS_WHILE_STR) == 0) {
+            bioblocksWhileOperation(blockOp, blocksTrans, initTime, endIfVar);
+        } else if (blockType.compare(BIOBLOCKS_VARIABLE_SET_STR) == 0) {
+            variablesSet(blockOp, blocksTrans, initTime, endIfVar);
+        } else if (blockType.compare(BIOBLOCKS_THERMOCYCLING_STR) == 0) {
+            thermocyclingOperation(blockOp, blocksTrans, initTime, endIfVar);
+        } else {
+            processBioBlocksOp(blockOp, blocksTrans, initTime, endIfVar);
         }
+    } catch (std::invalid_argument & e) {
+        throw(std::invalid_argument("BioBlocksTranslator::processLinkedBlocks. " + std::string(e.what())));
     }
 }
 
@@ -137,7 +154,7 @@ void BioBlocksTranslator::thermocyclingOperation(
             const ContainerManager::PCRStepTuple & actualTuple = *it;
 
             std::shared_ptr<MathematicOperable> actualInitTime = NULL;
-            if (it == stepsVector.begin() + 1) {//first element
+            if (it == stepsVector.begin()) {//first element
                 actualInitTime = initTime != NULL ? initTime : processIniTime(initTimeValue);
             }
 
@@ -226,33 +243,21 @@ void BioBlocksTranslator::bioblocksIfOperation(
             initializeVarToZero(triggerIfName);
 
             std::shared_ptr<VariableEntry> elseVar = NULL;
-            if(!bioblocksIfObj["else"].is_null()) {
+            if(BlocksUtils::hasProperty("else", bioblocksIfObj)) {
                 std::string elseTriggerName = BlocksUtils::generateElseIfVar(id);
                 initializeVarToInfinite(elseTriggerName);
                 elseVar = ptrGraph->getVariable(elseTriggerName);
-
-                json elseJson = bioblocksIfObj["else"];
-                json::iterator elseIt = elseJson.begin();
-                if (elseIt != elseJson.end()) {
-                    for(; elseIt != elseJson.end(); ++it) {
-                        std::shared_ptr<MathematicOperable> tempElseTime = NULL;
-                        if (elseIt == elseJson.begin() + 1) {//first element
-                            tempElseTime = elseVar;
-                        }
-
-                        std::vector<std::shared_ptr<VariableEntry>> tempElseEndVar;
-                        if (elseIt == elseJson.end() - 1) {//last element
-                            tempElseEndVar.reserve(endIfVar.size());
-                            tempElseEndVar.insert(tempElseEndVar.begin(), endIfVar.begin(), endIfVar.end());
-                            tempElseEndVar.push_back(actualIfEndVar);
-                        }
-                        processLinkedBlocks(*elseIt, blocksTrans, tempElseTime, tempElseEndVar);
-                    }
-                } else {
-                    throw(std::invalid_argument("empty else " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
-                }
             }
+
             std::shared_ptr<IfBlockPOJO> ifBlock = std::make_shared<IfBlockPOJO>(id, initValueVar, actualIfEndVar, endIfVar, elseVar);
+
+            if (initTimeValue() < 0) { //if the block is linked
+                linkedlogicOps.push_back(ifBlock);
+            } else { //if the block is free
+                freelogicOps.push_back(ifBlock);
+            }
+
+            lastBlockProcess = ifBlock;
 
             AutoEnumerate branchSerial;
             for(;it != branches.end(); ++it) {
@@ -267,7 +272,7 @@ void BioBlocksTranslator::bioblocksIfOperation(
                     for(; nestedOpIt != nestedOpJSON.end(); ++nestedOpIt) {
 
                         std::shared_ptr<VariableEntry> trigerredVar = NULL;
-                        if (nestedOpIt == nestedOpJSON.begin() + 1) { //first element
+                        if (nestedOpIt == nestedOpJSON.begin()) { //first element
                             int branchId = branchSerial.getNextValue();
 
                             std::string trigerredVarName = BlocksUtils::generateTriggeredIfVar(id, branchId);
@@ -283,13 +288,36 @@ void BioBlocksTranslator::bioblocksIfOperation(
                             tempEndIfVar.insert(tempEndIfVar.begin(), endIfVar.begin(), endIfVar.end());
                             tempEndIfVar.push_back(actualIfEndVar);
                         }
-                        processLinkedBlocks(*nestedOpIt, blocksTrans, trigerredVar, tempEndIfVar);
+                        processBlock(*nestedOpIt, blocksTrans, trigerredVar, tempEndIfVar);
                     }
                 } else {
                     throw(std::invalid_argument("empty nestedOps " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
                 }
             }
-            logicOps.push_back(ifBlock);
+
+            if (elseVar != NULL) {
+                json elseJson = bioblocksIfObj["else"];
+                json::iterator elseIt = elseJson.begin();
+                if (elseIt != elseJson.end()) {
+                    for(; elseIt != elseJson.end(); ++it) {
+                        std::shared_ptr<MathematicOperable> tempElseTime = NULL;
+                        if (elseIt == elseJson.begin()) {//first element
+                            tempElseTime = elseVar;
+                        }
+
+                        std::vector<std::shared_ptr<VariableEntry>> tempElseEndVar;
+                        if (elseIt == elseJson.end() - 1) {//last element
+                            tempElseEndVar.reserve(endIfVar.size());
+                            tempElseEndVar.insert(tempElseEndVar.begin(), endIfVar.begin(), endIfVar.end());
+                            tempElseEndVar.push_back(actualIfEndVar);
+                        }
+                        processBlock(*elseIt, blocksTrans, tempElseTime, tempElseEndVar);
+                    }
+                } else {
+                    throw(std::invalid_argument("empty else " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
+                }
+            }
+
             lastBlockProcess = ifBlock;
         } else {
             throw(std::invalid_argument("empty branches " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
@@ -329,16 +357,23 @@ void BioBlocksTranslator::bioblocksWhileOperation(
             initializeVarToInfinite(endWhileName);
             std::shared_ptr<VariableEntry> endWhileVar = ptrGraph->getVariable(endWhileName);
 
-            for(; it != branches.end(); ++it) {
-                std::shared_ptr<MathematicOperable> tempInitTime = NULL;
-                if (it == branches.begin() + 1) { //first element
-                    tempInitTime = trigerredVar;
-                }
-                processLinkedBlocks(*it, blocksTrans, tempInitTime);
+            std::shared_ptr<BlockPOJOInterface> whileBlock = std::make_shared<WhileBlockPOJO>(id, condition, initTimeVar, trigerredVar, endWhileVar, endIfVar);
+
+            if (initTimeValue() < 0) { //if the block is linked
+                linkedlogicOps.push_back(whileBlock);
+            } else { //if the block is free
+                freelogicOps.push_back(whileBlock);
             }
 
-            std::shared_ptr<BlockPOJOInterface> whileBlock = std::make_shared<WhileBlockPOJO>(id, condition, initTimeVar, trigerredVar, endWhileVar, endIfVar);
-            logicOps.push_back(whileBlock);
+            lastBlockProcess = whileBlock;
+
+            for(; it != branches.end(); ++it) {
+                std::shared_ptr<MathematicOperable> tempInitTime = NULL;
+                if (it == branches.begin()) { //first element
+                    tempInitTime = trigerredVar;
+                }
+                processBlock(*it, blocksTrans, tempInitTime);
+            }
             lastBlockProcess = whileBlock;
         } else {
             throw(std::invalid_argument("empty branches " + BlocksUtils::jsonObjToStr(bioblocksWhileObj)));

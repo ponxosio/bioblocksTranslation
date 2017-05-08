@@ -49,7 +49,7 @@ public:
         branchesVector.push_back(std::make_tuple(condition, trigerVariable));
     }
 
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const;
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);
 
 protected:
     int id;
