@@ -26,7 +26,8 @@ public:
             std::shared_ptr<MathematicOperable> initTime,
             std::shared_ptr<VariableEntry> initVar,
             std::shared_ptr<VariableEntry> endVar,
-            std::vector<std::shared_ptr<VariableEntry>> endIfVector);
+            std::vector<std::shared_ptr<VariableEntry>> endIfVector,
+            std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
 
     virtual ~WhileBlockPOJO();
 
@@ -55,6 +56,7 @@ protected:
     std::shared_ptr<VariableEntry> initVar;
     std::shared_ptr<VariableEntry> endVar;
     std::vector<std::shared_ptr<VariableEntry>> endIfVector;
+    std::shared_ptr<VariableEntry> endWhileExecutingVar;
 };
 
 #endif // WHILEBLOCKPOJO_H

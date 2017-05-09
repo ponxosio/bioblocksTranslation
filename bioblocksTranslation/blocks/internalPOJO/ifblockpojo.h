@@ -28,7 +28,8 @@ public:
                 std::shared_ptr<MathematicOperable> initTime,
                 std::shared_ptr<VariableEntry> endIfVar,
                 std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
-                std::shared_ptr<VariableEntry> elseVar = NULL);
+                std::shared_ptr<VariableEntry> elseVar = NULL,
+                std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
 
     virtual ~IfBlockPOJO();
 
@@ -58,6 +59,7 @@ protected:
     std::shared_ptr<MathematicOperable> initTime;
     std::shared_ptr<VariableEntry> endIfVar;
     std::vector<std::shared_ptr<VariableEntry>> otherIfEnds;
+    std::shared_ptr<VariableEntry> endWhileExecutingVar;
 };
 
 #endif // IFBLOCKPOJO_H

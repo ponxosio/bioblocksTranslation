@@ -161,6 +161,10 @@ std::string BlocksUtils::generateEndWhileVar(int op) {
     return "endWhile_" + std::to_string(op);
 }
 
+std::string BlocksUtils::generateExecutingWhileVar(int op) {
+    return "executingWhile_" + std::to_string(op);
+}
+
 std::string BlocksUtils::generateExecutingVar(const std::vector<int> & ops) {
     std::stringstream stream;
     stream << "executing";
@@ -169,6 +173,10 @@ std::string BlocksUtils::generateExecutingVar(const std::vector<int> & ops) {
         stream << op;
     }
     return stream.str();
+}
+
+std::string BlocksUtils::generateThermocyclingCounter(int op) {
+    return "thermocycling_cycles_count_" + std::to_string(op);
 }
 
 std::shared_ptr<ComparisonOperable> BlocksUtils::makeTimeCondition(

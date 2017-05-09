@@ -82,19 +82,19 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
                                                "duration" + std::to_string(i),
                                                "duration_units" + std::to_string(i)}, containerObj);
 
-            units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units"]);
-            std::string tempStr = containerObj["temperature"];
+            units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units" + std::to_string(i)]);
+            std::string tempStr = containerObj["temperature" + std::to_string(i)];
             double temperature = std::stof(tempStr);
 
-            units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units"]);
-            std::string durationStr =  containerObj["duration"];
+            units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units" + std::to_string(i)] );
+            std::string durationStr =  containerObj["duration" + std::to_string(i)];
             int duration = std::stoi(durationStr);
 
             steps.push_back(std::make_tuple(std::make_tuple(temperature, temperatureUnits),
                                             std::make_tuple(duration , durationUnits)));
         }
         return steps;
-    } catch (std::invalid_argument & e) {
+    } catch (std::exception & e) {
         throw(std::invalid_argument("ContainerManager::extractVolumeSingleContainer." + std::string(e.what())));
     }
 }

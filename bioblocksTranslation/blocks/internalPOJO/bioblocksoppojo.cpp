@@ -5,7 +5,7 @@ typedef ProtocolBoolF BF;
 BioBlocksOpPOJO::BioBlocksOpPOJO() {
     duration = NULL;
     initTime = NULL;
-
+    endWhileExecutingVar = NULL;
 }
 
 BioBlocksOpPOJO::BioBlocksOpPOJO(const BioBlocksOpPOJO & bbpojo) :
@@ -14,17 +14,20 @@ BioBlocksOpPOJO::BioBlocksOpPOJO(const BioBlocksOpPOJO & bbpojo) :
     opIds = bbpojo.opIds;
     duration = bbpojo.duration;
     initTime = bbpojo.initTime;
+    endWhileExecutingVar = bbpojo.endWhileExecutingVar;
 }
 
 BioBlocksOpPOJO::BioBlocksOpPOJO(
         int opId,
         std::shared_ptr<MathematicOperable> duration,
         std::shared_ptr<MathematicOperable> initTime,
-        std::vector<std::shared_ptr<VariableEntry>> endIfVar) :
+        std::vector<std::shared_ptr<VariableEntry>> endIfVar,
+        std::shared_ptr<VariableEntry> endWhileExecutingVar) :
     endIfVector(endIfVar)
 {
     this->duration = duration;
     this->initTime = initTime;
+    this->endWhileExecutingVar = endWhileExecutingVar;
 
     opIds.push_back(opId);
 }
@@ -33,11 +36,13 @@ BioBlocksOpPOJO::BioBlocksOpPOJO(
         std::vector<int> opIds,
         std::shared_ptr<MathematicOperable> duration,
         std::shared_ptr<MathematicOperable> initTime,
-        std::vector<std::shared_ptr<VariableEntry>> endIfVar) :
+        std::vector<std::shared_ptr<VariableEntry>> endIfVar,
+        std::shared_ptr<VariableEntry> endWhileExecutingVar) :
     opIds(opIds), endIfVector(endIfVar)
 {
     this->duration = duration;
     this->initTime = initTime;
+    this->endWhileExecutingVar = endWhileExecutingVar;
 }
 
 BioBlocksOpPOJO::~BioBlocksOpPOJO(){
@@ -82,6 +87,11 @@ void BioBlocksOpPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gr
             int setEndIfVar = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
             graphPtr->appendOperations(setEndIfVar);
         }
+    }
+
+    if (endWhileExecutingVar != NULL) {
+        int unsetExecutingWhile = graphPtr->emplaceAssignation(endWhileExecutingVar->toString(), MF::getNum(0));
+        graphPtr->appendOperations(unsetExecutingWhile);
     }
     graphPtr->endIfBlock();
 }

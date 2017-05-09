@@ -72,8 +72,11 @@ public:
 
     static std::string generateTriggerWhileVar(int op);
     static std::string generateEndWhileVar(int op);
+    static std::string generateExecutingWhileVar(int op);
 
     static std::string generateExecutingVar(const std::vector<int> & ops);
+
+    static std::string generateThermocyclingCounter(int op);
 
     static std::shared_ptr<ComparisonOperable> makeTimeCondition(std::shared_ptr<MathematicOperable> timeVar,
                                                                  std::shared_ptr<MathematicOperable> initTime,

@@ -23,11 +23,13 @@ public:
     BioBlocksOpPOJO(int opId,
                     std::shared_ptr<MathematicOperable> duration,
                     std::shared_ptr<MathematicOperable> initTime,
-                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{});
+                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{},
+                    std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
     BioBlocksOpPOJO(std::vector<int> opIds,
                     std::shared_ptr<MathematicOperable> duration,
                     std::shared_ptr<MathematicOperable> initTime,
-                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{});
+                    std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{},
+                    std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
 
     virtual ~BioBlocksOpPOJO();
 
@@ -54,6 +56,7 @@ protected:
     std::shared_ptr<MathematicOperable> duration;
     std::shared_ptr<MathematicOperable> initTime;
     std::vector<std::shared_ptr<VariableEntry>> endIfVector;
+    std::shared_ptr<VariableEntry> endWhileExecutingVar;
 
 
 };

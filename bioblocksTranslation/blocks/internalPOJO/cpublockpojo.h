@@ -21,7 +21,9 @@ public:
     CpuBlockPOJO(const CpuBlockPOJO & bbpojo);
     CpuBlockPOJO(int opId,
                  std::shared_ptr<MathematicOperable> initTime,
-                 std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{});
+                 std::vector<std::shared_ptr<VariableEntry>> endIfVector = std::vector<std::shared_ptr<VariableEntry>>{},
+                 std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL,
+                 bool executedOnlyOnce = true);
 
     virtual ~CpuBlockPOJO();
 
@@ -37,8 +39,10 @@ public:
 
 protected:
     int opId;
+    bool executedOnlyOnce;
     std::shared_ptr<MathematicOperable> initTime;
     std::vector<std::shared_ptr<VariableEntry>> endIfVector;
+    std::shared_ptr<VariableEntry> endWhileExecutingVar;
 };
 
 #endif // CPUBLOCKPOJO_H
