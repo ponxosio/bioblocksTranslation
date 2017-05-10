@@ -52,10 +52,13 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile() throw(std::i
 
 void BioBlocksTranslator::makeProtocolGraph() {
     setTimeStep();
+    initActualTimeVar();
 
     for(int op: initializationOps) {
         ptrGraph->appendOperations(op);
     }
+
+    processLoadContainers();
 
     ptrGraph->startLoopBlock(BF::lessEq(ptrGraph->getTimeVariable(),MF::add(protocolEndTime, timeSlice)));
 
@@ -78,11 +81,27 @@ void BioBlocksTranslator::makeProtocolGraph() {
 }
 
 void BioBlocksTranslator::setTimeStep() {
-    //TODO:
     double value = timeSliceValue.to(units::s);
     int timeStep = ptrGraph->emplaceSetTimeStep(MF::getNum(value), units::s);
     timeSlice = MF::getNum(value);
     ptrGraph->setStartNode(timeStep);
+}
+
+void BioBlocksTranslator::initActualTimeVar() {
+    int initActualTime = ptrGraph->emplaceAssignation(ptrGraph->getTimeVariable()->toString(), MF::getNum(0));
+    ptrGraph->appendOperations(initActualTime);
+}
+
+void BioBlocksTranslator::processLoadContainers() {
+    const std::unordered_map<std::string, std::shared_ptr<VirtualContainer>> & vcMap = ptrGraph->getVContainerMap();
+    for(const auto & vcPair : vcMap) {
+        const std::string & name = vcPair.first;
+        std::shared_ptr<VirtualContainer> vcontainer = vcPair.second;
+
+        units::Volume initiVol = vcontainer->getInitialVolume();
+        int loadOp = ptrGraph->emplaceLoadContainer(name, MF::getNum(initiVol.to(units::ml)), units::ml);
+        ptrGraph->appendOperations(loadOp);
+    }
 }
 
 void BioBlocksTranslator::resetAttributes(const std::string & protocolName) {

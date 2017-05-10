@@ -64,6 +64,9 @@ protected:
 
     void makeProtocolGraph();
     void setTimeStep();
+    void initActualTimeVar();
+    void processLoadContainers();
+
     void resetAttributes(const std::string & protocolName);
 
     void processLinkedBlocks(nlohmann::json blockObj,
