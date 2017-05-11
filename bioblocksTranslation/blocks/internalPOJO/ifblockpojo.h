@@ -31,6 +31,15 @@ public:
                 std::shared_ptr<VariableEntry> elseVar = NULL,
                 std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
 
+    IfBlockPOJO(int id,
+                std::shared_ptr<MathematicOperable> initTime,
+                std::shared_ptr<VariableEntry> endIfVar,
+                std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
+                units::Time timeSlice,
+                std::shared_ptr<VariableEntry> elseVar = NULL,
+                std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
+
+
     virtual ~IfBlockPOJO();
 
     inline int getId() const {
@@ -54,6 +63,9 @@ public:
 
 protected:
     int id;
+    bool linked;
+    units::Time timeSlice;
+
     std::vector<BranchTuple> branchesVector;
     std::shared_ptr<VariableEntry> elseVar;
     std::shared_ptr<MathematicOperable> initTime;

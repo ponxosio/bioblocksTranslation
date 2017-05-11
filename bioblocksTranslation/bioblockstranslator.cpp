@@ -331,11 +331,13 @@ void BioBlocksTranslator::bioblocksIfOperation(
                 elseVar = ptrGraph->getVariable(elseTriggerName);
             }
 
-            std::shared_ptr<IfBlockPOJO> ifBlock = std::make_shared<IfBlockPOJO>(id, initValueVar, actualIfEndVar, endIfVar, elseVar, endWhileExecutingVar);
+            std::shared_ptr<IfBlockPOJO> ifBlock = NULL;std::make_shared<IfBlockPOJO>(id, initValueVar, actualIfEndVar, endIfVar, elseVar, endWhileExecutingVar);
 
             if (initTimeValue() < 0) { //if the block is linked
+                ifBlock = std::make_shared<IfBlockPOJO>(id, initValueVar, actualIfEndVar, endIfVar, timeSliceValue, elseVar, endWhileExecutingVar);
                 linkedlogicOps.push_back(ifBlock);
             } else { //if the block is free
+                ifBlock = std::make_shared<IfBlockPOJO>(id, initValueVar, actualIfEndVar, endIfVar, elseVar, endWhileExecutingVar);
                 freelogicOps.push_back(ifBlock);
             }
 
@@ -449,19 +451,12 @@ void BioBlocksTranslator::bioblocksWhileOperation(
             std::string executingWhileName = BlocksUtils::generateExecutingWhileVar(id);
             initializeVarToZero(executingWhileName);
 
-            std::shared_ptr<BlockPOJOInterface> whileBlock =
-                    std::make_shared<WhileBlockPOJO>(
-                        id,
-                        condition,
-                        initTimeVar,
-                        trigerredVar,
-                        endWhileVar,
-                        endIfVar,
-                        endWhileExecutingVar);
-
+            std::shared_ptr<BlockPOJOInterface> whileBlock = NULL;
             if (initTimeValue() < 0) { //if the block is linked
+                whileBlock = std::make_shared<WhileBlockPOJO>(id,condition,initTimeVar,trigerredVar,endWhileVar,endIfVar,timeSliceValue,endWhileExecutingVar);
                 linkedlogicOps.push_back(whileBlock);
             } else { //if the block is free
+                whileBlock = std::make_shared<WhileBlockPOJO>(id,condition,initTimeVar,trigerredVar,endWhileVar,endIfVar,endWhileExecutingVar);
                 freelogicOps.push_back(whileBlock);
             }
 

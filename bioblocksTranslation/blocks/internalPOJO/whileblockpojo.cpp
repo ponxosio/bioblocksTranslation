@@ -5,6 +5,9 @@ typedef ProtocolBoolF BF;
 
 WhileBlockPOJO::WhileBlockPOJO() {
     this->id = -1;
+    this->linked = false;
+    this->timeSlice = -1*units::s;
+
     this->condition = NULL;
     this->initTime = NULL;
     this->initVar = NULL;
@@ -14,6 +17,9 @@ WhileBlockPOJO::WhileBlockPOJO() {
 
 WhileBlockPOJO::WhileBlockPOJO(const WhileBlockPOJO & obj) {
     this->id = obj.id;
+    this->linked = obj.linked;
+    this->timeSlice = obj.timeSlice;
+
     this->condition = obj.condition;
     this->initTime = obj.initTime;
     this->initVar = obj.initVar;
@@ -32,6 +38,31 @@ WhileBlockPOJO::WhileBlockPOJO(
     endIfVector(endIfVector)
 {
     this->id = id;
+    this->linked = false;
+    this->timeSlice = -1*units::s;
+
+    this->condition = condition;
+    this->initTime = initTime;
+    this->initVar = initVar;
+    this->endVar = endVar;
+    this->endWhileExecutingVar = endWhileExecutingVar;
+}
+
+WhileBlockPOJO::WhileBlockPOJO(
+        int id,
+        std::shared_ptr<ComparisonOperable> condition,
+        std::shared_ptr<MathematicOperable> initTime,
+        std::shared_ptr<VariableEntry> initVar,
+        std::shared_ptr<VariableEntry> endVar,
+        std::vector<std::shared_ptr<VariableEntry>> endIfVector,
+        units::Time timeSlice,
+        std::shared_ptr<VariableEntry> endWhileExecutingVar) :
+    endIfVector(endIfVector)
+{
+    this->id = id;
+    this->linked = true;
+    this->timeSlice = timeSlice;
+
     this->condition = condition;
     this->initTime = initTime;
     this->initVar = initVar;
@@ -46,6 +77,11 @@ WhileBlockPOJO::~WhileBlockPOJO() {
 void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
     std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
     std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar, initTime, getEndVariable());
+
+    if (linked) {
+        double timeValue = Utils::toDefaultUnits(timeSlice);
+        timeVar = MF::add(timeVar, MF::getNum(Utils::pround(timeValue, 5))); //set the precision to 5 decimal to avoid floating point representation errors
+    }
 
     std::string executingWhileName = BlocksUtils::generateExecutingWhileVar(id);
     std::shared_ptr<ComparisonOperable> executingIsUnset = BF::equal(graphPtr->getVariable(executingWhileName), MF::getNum(0));

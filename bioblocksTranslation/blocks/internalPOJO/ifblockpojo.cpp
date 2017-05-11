@@ -5,6 +5,9 @@ typedef ProtocolBoolF BF;
 
 IfBlockPOJO::IfBlockPOJO() {
     this->id = -1;
+    this->linked = false;
+    this->timeSlice = -1*units::s;
+
     this->initTime = NULL;
     this->endIfVar = NULL;
     this->elseVar = NULL;
@@ -15,6 +18,9 @@ IfBlockPOJO::IfBlockPOJO(const IfBlockPOJO & obj) :
     branchesVector(obj.branchesVector), otherIfEnds(obj.otherIfEnds)
 {
     this->id = obj.id;
+    this->linked = obj.linked;
+    this->timeSlice = obj.timeSlice;
+
     this->initTime = obj.initTime;
     this->endIfVar = obj.endIfVar;
     this->elseVar = obj.elseVar;
@@ -28,9 +34,32 @@ IfBlockPOJO::IfBlockPOJO(
         std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
         std::shared_ptr<VariableEntry> elseVar,
         std::shared_ptr<VariableEntry> endWhileExecutingVar) :
+     otherIfEnds(otherIfEnds)
+{
+    this->id = id;
+    this->linked = false;
+    this->timeSlice = -1*units::s;
+
+    this->initTime = initTime;
+    this->endIfVar = endIfVar;
+    this->elseVar = elseVar;
+    this->endWhileExecutingVar = endWhileExecutingVar;
+}
+
+IfBlockPOJO::IfBlockPOJO(
+        int id,
+        std::shared_ptr<MathematicOperable> initTime,
+        std::shared_ptr<VariableEntry> endIfVar,
+        std::vector<std::shared_ptr<VariableEntry>> otherIfEnds,
+        units::Time timeSlice,
+        std::shared_ptr<VariableEntry> elseVar,
+        std::shared_ptr<VariableEntry> endWhileExecutingVar) :
     otherIfEnds(otherIfEnds)
 {
     this->id = id;
+    this->linked = true;
+    this->timeSlice = timeSlice;
+
     this->initTime = initTime;
     this->endIfVar = endIfVar;
     this->elseVar = elseVar;
@@ -43,8 +72,13 @@ IfBlockPOJO::~IfBlockPOJO() {
 
 void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
     if (!branchesVector.empty()) {
-        std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
+        std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();;
         std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar,initTime);
+
+        if (linked) {
+            double timeValue = Utils::toDefaultUnits(timeSlice);
+            timeVar = MF::add(timeVar, MF::getNum(Utils::pround(timeValue, 5))); //set the precision to 5 decimal to avoid floating point representation errors
+        }
 
         std::string triggeredFlagName = BlocksUtils::generateTrigerredIfFlagVar(id);
         std::shared_ptr<MathematicOperable> triggeredFlag = graphPtr->getVariable(triggeredFlagName);

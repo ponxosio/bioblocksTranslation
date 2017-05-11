@@ -28,6 +28,14 @@ public:
             std::shared_ptr<VariableEntry> endVar,
             std::vector<std::shared_ptr<VariableEntry>> endIfVector,
             std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
+    WhileBlockPOJO(int id,
+            std::shared_ptr<ComparisonOperable> condition,
+            std::shared_ptr<MathematicOperable> initTime,
+            std::shared_ptr<VariableEntry> initVar,
+            std::shared_ptr<VariableEntry> endVar,
+            std::vector<std::shared_ptr<VariableEntry>> endIfVector,
+            units::Time timeSlice,
+            std::shared_ptr<VariableEntry> endWhileExecutingVar = NULL);
 
     virtual ~WhileBlockPOJO();
 
@@ -51,6 +59,9 @@ public:
 
 protected:
     int id;
+    bool linked;
+    units::Time timeSlice;
+
     std::shared_ptr<ComparisonOperable> condition;
     std::shared_ptr<MathematicOperable> initTime;
     std::shared_ptr<VariableEntry> initVar;
