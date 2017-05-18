@@ -125,53 +125,33 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
 
 std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json & continuousflowObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"continuosflow_type", "source", "destination", "duration", "duration_units"}, continuousflowObj);
+        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"source",
+                                                                    "rate",
+                                                                    "rate_volume_units",
+                                                                    "rate_time_units"}, continuousflowObj);
 
         std::vector<int> opsIds;
 
-        std::vector<std::string> sourceContainers = vcManager->processContainerBlock(continuousflowObj["source"]);
-        std::vector<std::string> destinationContainers = vcManager->processContainerBlock(continuousflowObj["destination"]);
+        std::vector<std::string> containersSequence = vcManager->processContainerBlock(continuousflowObj["source"]);
 
-        std::string flowTypeStr = continuousflowObj["continuosflow_type"];
-        int flowType = std::stoi(flowTypeStr);
-        switch (flowType) {
-        case 1: {//one to one
-            ContainerManager::RateMap rateMap = vcManager->extractRate(continuousflowObj["destination"]);
+        std::shared_ptr<MathematicOperable> rateValue = mathBlocks->translateMathBlock(continuousflowObj["rate"]);
+        units::Volume rateVolumeUnits = BlocksUtils::getVolumeUnits(continuousflowObj["rate_volume_units"]);
+        units::Time rateTimeUnits = BlocksUtils::getTimeUnits(continuousflowObj["rate_time_units"]);
 
-            const std::string & sourceName = sourceContainers[0];
-            const std::string & destinationName = destinationContainers[0];
+        if (containersSequence.size() > 1) {
+            auto it = containersSequence.begin();
+            std::string first = *it;
+            ++it;
 
-            std::shared_ptr<MathematicOperable> rate = std::get<0>(rateMap[destinationName]);
-            units::Volumetric_Flow rateUnits = std::get<1>(rateMap[destinationName]);
-
-            opsIds.push_back(graphPtr->emplaceSetContinuousFlow(sourceName, destinationName, rate, rateUnits));
-            break;
-        } case 2: {//one to many
-            ContainerManager::RateMap rateMap = vcManager->extractRate(continuousflowObj["destination"]);
-
-            const std::string & sourceName = sourceContainers[0];
-            for(const std::string & destinationName : destinationContainers) {
-                std::shared_ptr<MathematicOperable> rate = std::get<0>(rateMap[destinationName]);
-                units::Volumetric_Flow rateUnits = std::get<1>(rateMap[destinationName]);
-
-                opsIds.push_back(graphPtr->emplaceSetContinuousFlow(sourceName, destinationName, rate, rateUnits));
+            for(; it != containersSequence.end(); ++it) {
+                const std::string & next = *it;
+                opsIds.push_back(graphPtr->emplaceSetContinuousFlow(first, next, rateValue, rateVolumeUnits / rateTimeUnits));
+                first = next;
             }
-            break;
-        } case 3: {//many to one
-            ContainerManager::RateMap rateMap = vcManager->extractRate(continuousflowObj["source"]);
-
-            const std::string & sourceName = sourceContainers[0];
-            for(const std::string & destinationName : destinationContainers) {
-                std::shared_ptr<MathematicOperable> rate = std::get<0>(rateMap[destinationName]);
-                units::Volumetric_Flow rateUnits = std::get<1>(rateMap[destinationName]);
-
-                opsIds.push_back(graphPtr->emplaceSetContinuousFlow(sourceName, destinationName, rate, rateUnits));
-            }
-            break;
-        } default:
-            throw(std::invalid_argument("unknow pippete type: " + continuousflowObj["continuosflow_type"]));
-            break;
+        } else {
+            throw(std::invalid_argument("container sequence list is not at least of size 2 in json " + BlocksUtils::jsonObjToStr(continuousflowObj)));
         }
+
         return opsIds;
     } catch (std::exception & e) {
         throw(std::invalid_argument("OperationsBlocks::continuousflowOperation. " + std::string(e.what())));

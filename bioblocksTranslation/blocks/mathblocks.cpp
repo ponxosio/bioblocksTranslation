@@ -85,8 +85,8 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathSingleOperation(const json &
         BlocksUtils::checkPropertiesExists(std::vector<std::string>{"value","op"}, mathSingleObj);
 
         std::shared_ptr<MathematicOperable> valuePtr = translateMathBlock(mathSingleObj["value"]);
-        UnaryOperation::UnaryOperator op = getUnaryOperator(mathSingleObj["op"]);
-        return std::make_shared<UnaryOperation>(valuePtr, op);
+        ProtocolUnaryOperation::UnaryOperator op = getUnaryOperator(mathSingleObj["op"]);
+        return std::make_shared<ProtocolUnaryOperation>(valuePtr, op);
     } catch (std::invalid_argument & e) {
         throw(std::invalid_argument("MathBlocks::mathArithmeticOperation." + std::string(e.what())));
     }
@@ -192,40 +192,40 @@ ArithmeticOperation::ArithmeticOperator MathBlocks::getArithmeticOperator(const 
     return op;
 }
 
-UnaryOperation::UnaryOperator MathBlocks::getUnaryOperator(const std::string & uopStr) {
-    UnaryOperation::UnaryOperator op;
+ProtocolUnaryOperation::UnaryOperator MathBlocks::getUnaryOperator(const std::string & uopStr) {
+    ProtocolUnaryOperation::UnaryOperator op;
     if( uopStr.compare(BLOCKLY_ABSOLUTE_VALUE_STRING ) == 0) {
-        op = UnaryOperation::absoluteValue;
+        op = ProtocolUnaryOperation::absoluteValue;
     } else if( uopStr.compare(BLOCKLY_FLOOR_VALUE_STRING ) == 0) {
-        op = UnaryOperation::floor;
+        op = ProtocolUnaryOperation::floor;
     } else if( uopStr.compare(BLOCKLY_ROUND_VALUE_STRING ) == 0) {
-        op = UnaryOperation::round;
+        op = ProtocolUnaryOperation::round;
     } else if( uopStr.compare(BLOCKLY_CEILING_VALUE_STRING ) == 0) {
-        op = UnaryOperation::ceiling;
+        op = ProtocolUnaryOperation::ceiling;
     } else if( uopStr.compare(BLOCKLY_SQRT_VALUE_STRING ) == 0) {
-        op = UnaryOperation::sqrt;
+        op = ProtocolUnaryOperation::sqrt;
     } else if( uopStr.compare(BLOCKLY_LN_VALUE_STRING ) == 0) {
-        op = UnaryOperation::ln;
+        op = ProtocolUnaryOperation::ln;
     } else if( uopStr.compare(BLOCKLY_LOG10_VALUE_STRING ) == 0) {
-        op = UnaryOperation::log10;
+        op = ProtocolUnaryOperation::log10;
     } else if( uopStr.compare(BLOCKLY_EXP_E_VALUE_STRING ) == 0) {
-        op = UnaryOperation::exp_e;
+        op = ProtocolUnaryOperation::exp_e;
     } else if( uopStr.compare(BLOCKLY_EXP_10_VALUE_STRING ) == 0) {
-        op = UnaryOperation::exp_10;
+        op = ProtocolUnaryOperation::exp_10;
     } else if( uopStr.compare(BLOCKLY_MINUS_VALUE_STRING ) == 0) {
-        op = UnaryOperation::minus;
+        op = ProtocolUnaryOperation::minus;
     } else if( uopStr.compare(BLOCKLY_SIN_VALUE_STRING ) == 0) {
-        op = UnaryOperation::sin_op;
+        op = ProtocolUnaryOperation::sin_op;
     } else if( uopStr.compare(BLOCKLY_COS_VALUE_STRING ) == 0) {
-        op = UnaryOperation::cos_op;
+        op = ProtocolUnaryOperation::cos_op;
     } else if( uopStr.compare(BLOCKLY_TAN_VALUE_STRING ) == 0) {
-        op = UnaryOperation::tan_op;
+        op = ProtocolUnaryOperation::tan_op;
     } else if( uopStr.compare(BLOCKLY_ASIN_VALUE_STRING ) == 0) {
-        op = UnaryOperation::asin_op;
+        op = ProtocolUnaryOperation::asin_op;
     } else if( uopStr.compare(BLOCKLY_ACOS_VALUE_STRING ) == 0) {
-        op = UnaryOperation::acos_op;
+        op = ProtocolUnaryOperation::acos_op;
     } else if( uopStr.compare(BLOCKLY_ATAN_VALUE_STRING ) == 0) {
-        op = UnaryOperation::atan_op;
+        op = ProtocolUnaryOperation::atan_op;
     } else {
         throw(std::invalid_argument("MathBlocks::getUnaryOperator. Unknow op" + uopStr));
     }

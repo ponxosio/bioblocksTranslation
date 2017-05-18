@@ -92,7 +92,7 @@ protected:
     std::shared_ptr<MathematicOperable> variableGetOperation(const nlohmann::json & variableGetObj) throw(std::invalid_argument);
 
     ArithmeticOperation::ArithmeticOperator getArithmeticOperator(const std::string & aopStr) throw(std::invalid_argument);
-    UnaryOperation::UnaryOperator getUnaryOperator(const std::string & uopStr) throw(std::invalid_argument);
+    ProtocolUnaryOperation::UnaryOperator getUnaryOperator(const std::string & uopStr) throw(std::invalid_argument);
     double getNumericConstant(const std::string & constantStr) throw(std::invalid_argument);
 };
 
