@@ -14,10 +14,10 @@
 
 #include <utils/units.h>
 
-#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+#include "bioblocksTranslation/blocks/internalPOJO/logicblockpojointerface.h"
 #include "bioblocksTranslation/blocks/blocksutils.h"
 
-class IfBlockPOJO : public BlockPOJOInterface
+class IfBlockPOJO : public LogicBlockPOJOInterface
 {
 public:
     typedef std::tuple<std::shared_ptr<ComparisonOperable>,std::shared_ptr<VariableEntry>> BranchTuple;
@@ -59,7 +59,7 @@ public:
         branchesVector.push_back(std::make_tuple(condition, trigerVariable));
     }
 
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr, std::shared_ptr<LogicBlocksManager> logicManager) const throw(std::runtime_error);
 
 protected:
     int id;

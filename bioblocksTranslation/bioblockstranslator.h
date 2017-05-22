@@ -27,6 +27,7 @@
 #include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
 #include "bioblocksTranslation/blocks/internalPOJO/cpublockpojo.h"
 #include "bioblocksTranslation/blocks/internalPOJO/ifblockpojo.h"
+#include "bioblocksTranslation/blocks/internalPOJO/logicblockpojointerface.h"
 #include "bioblocksTranslation/blocks/internalPOJO/whileblockpojo.h"
 
 #include "bioblocksTranslation/blocks/blocksutils.h"
@@ -37,6 +38,8 @@
 
 #include "bioblocksTranslation/interfaces/translationinterface.h"
 
+#include "bioblocksTranslation/logicblocksmanager.h"
+
 #include "bioblocksTranslation/bioblockstranslator_global.h"
 
 class BIOBLOCKSTRANSLATORSHARED_EXPORT BioBlocksTranslator : public TranslationInterface
@@ -45,7 +48,7 @@ public:
     BioBlocksTranslator(units::Time timeSlice, const std::string & jsonFilepath);
     virtual ~BioBlocksTranslator();
 
-    virtual std::shared_ptr<ProtocolGraph> translateFile() throw(std::invalid_argument);
+    virtual std::shared_ptr<ProtocolGraph> translateFile(std::shared_ptr<LogicBlocksManager> logicBlocskManager = NULL) throw(std::invalid_argument);
 
 protected:
     std::string filePath;
@@ -62,7 +65,7 @@ protected:
     std::shared_ptr<MathematicOperable> protocolEndTime;
     std::shared_ptr<MathematicOperable> timeSlice;
 
-    void makeProtocolGraph();
+    void makeProtocolGraph(std::shared_ptr<LogicBlocksManager> logicBlocskManager);
     void setTimeStep();
     void initActualTimeVar();
     void processLoadContainers();

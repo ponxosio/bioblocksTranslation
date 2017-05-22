@@ -74,7 +74,7 @@ WhileBlockPOJO::~WhileBlockPOJO() {
 
 }
 
-void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
+void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr, std::shared_ptr<LogicBlocksManager> logicManager) const throw(std::runtime_error) {
     std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();
     std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar, initTime, getEndVariable());
 
@@ -87,6 +87,18 @@ void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gra
     std::shared_ptr<ComparisonOperable> executingIsUnset = BF::equal(graphPtr->getVariable(executingWhileName), MF::getNum(0));
 
     graphPtr->startIfBlock(timeCondition);
+
+    int logicBlockStartId = graphPtr->getNextAvailableNodeId();
+    if (logicManager != NULL) {
+        logicManager->addWhileLogicBlockStartId(logicBlockStartId);
+        logicManager->addWhileTriggerVar(logicBlockStartId, initVar);
+        logicManager->addWhileEndVar(logicBlockStartId, endVar);
+        logicManager->addWhileExecutingFlagVar(logicBlockStartId, graphPtr->getVariable(executingWhileName));
+        if (condition->isPhysical()) {
+            logicManager->setLogicBlockIdPhyscal(logicBlockStartId);
+        }
+    }
+
     graphPtr->startIfBlock(condition);
 
     graphPtr->startIfBlock(executingIsUnset);
@@ -107,11 +119,19 @@ void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gra
     for(const auto & endIfVar : endIfVector) {
         int setOtherIfEndTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
         graphPtr->appendOperations(setOtherIfEndTime);
+
+        if (logicManager != NULL) {
+            logicManager->addWhileEndVar(logicBlockStartId, endIfVar);
+        }
     }
 
     if (endWhileExecutingVar != NULL) {
         int unsetExecutingWhile = graphPtr->emplaceAssignation(endWhileExecutingVar->toString(), MF::getNum(0));
         graphPtr->appendOperations(unsetExecutingWhile);
+
+        if (logicManager != NULL) {
+            logicManager->addWhileEndVar(logicBlockStartId, endWhileExecutingVar);
+        }
     }
 
     graphPtr->endIfBlock();

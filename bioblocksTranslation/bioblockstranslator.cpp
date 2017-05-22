@@ -9,13 +9,14 @@ BioBlocksTranslator::BioBlocksTranslator(units::Time timeSlice, const std::strin
     filePath(jsonFilepath)
 {
     this->timeSliceValue = timeSlice;
+    this->timeSlice = MF::getNum(timeSlice.to(units::s));
 }
 
 BioBlocksTranslator::~BioBlocksTranslator() {
 
 }    
 
-std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile() throw(std::invalid_argument) {
+std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(std::shared_ptr<LogicBlocksManager> logicBlocskManager) throw(std::invalid_argument) {
     std::ifstream in(filePath);
     json js;
     try {
@@ -42,7 +43,7 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile() throw(std::i
                 protocolEndTime = MF::max(protocolEndTime, lastBlockProcess->getEndVariable());
             }
         }
-        makeProtocolGraph();
+        makeProtocolGraph(logicBlocskManager);
 
         return ptrGraph;
     } catch (std::exception & e) {
@@ -50,7 +51,7 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile() throw(std::i
     }
 }
 
-void BioBlocksTranslator::makeProtocolGraph() {
+void BioBlocksTranslator::makeProtocolGraph(std::shared_ptr<LogicBlocksManager> logicBlocskManager) {
     setTimeStep();
     initActualTimeVar();
 
@@ -63,7 +64,8 @@ void BioBlocksTranslator::makeProtocolGraph() {
     ptrGraph->startLoopBlock(BF::lessEq(ptrGraph->getTimeVariable(),MF::add(protocolEndTime, timeSlice)));
 
     for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : freelogicOps) {
-        logicBlock->appendOperationsToGraphs(ptrGraph);
+        std::shared_ptr<LogicBlockPOJOInterface> cast = std::dynamic_pointer_cast<LogicBlockPOJOInterface>(logicBlock);
+        cast->appendOperationsToGraphs(ptrGraph, logicBlocskManager);
     }
 
     for(const std::shared_ptr<BlockPOJOInterface> & opBlock : blocksOps) {
@@ -71,7 +73,8 @@ void BioBlocksTranslator::makeProtocolGraph() {
     }
 
     for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : linkedlogicOps) {
-        logicBlock->appendOperationsToGraphs(ptrGraph);
+        std::shared_ptr<LogicBlockPOJOInterface> cast = std::dynamic_pointer_cast<LogicBlockPOJOInterface>(logicBlock);
+        cast->appendOperationsToGraphs(ptrGraph, logicBlocskManager);
     }
 
     int timeStep = ptrGraph->emplaceTimeStep();
@@ -83,7 +86,6 @@ void BioBlocksTranslator::makeProtocolGraph() {
 void BioBlocksTranslator::setTimeStep() {
     double value = timeSliceValue.to(units::s);
     int timeStep = ptrGraph->emplaceSetTimeStep(MF::getNum(value), units::s);
-    timeSlice = MF::getNum(value);
     ptrGraph->setStartNode(timeStep);
 }
 
@@ -245,9 +247,9 @@ void BioBlocksTranslator::thermocyclingOperation(
         std::shared_ptr<BlockPOJOInterface> nextBlock =
                 std::make_shared<CpuBlockPOJO>(op,
                                                lastBlockProcess->getEndVariable(),
+                                               timeSlice,
                                                endIfVar,
-                                               ptrGraph->getVariable(executingWhileName),
-                                               false);
+                                               ptrGraph->getVariable(executingWhileName));
 
         lastBlockProcess = nextBlock;
         blocksOps.push_back(nextBlock);
@@ -284,7 +286,7 @@ void BioBlocksTranslator::variablesSet(
             initializationOps.push_back(op);
         } else {
             std::shared_ptr<MathematicOperable> initTimeVar = initTime != NULL ? initTime : processIniTime(initTimeValue);
-            std::shared_ptr<BlockPOJOInterface> nextBlock = std::make_shared<CpuBlockPOJO>(op, initTimeVar, endIfVar, endWhileExecutingVar);
+            std::shared_ptr<BlockPOJOInterface> nextBlock = std::make_shared<CpuBlockPOJO>(op, initTimeVar, timeSlice, endIfVar, endWhileExecutingVar);
 
             lastBlockProcess = nextBlock;
             blocksOps.push_back(nextBlock);

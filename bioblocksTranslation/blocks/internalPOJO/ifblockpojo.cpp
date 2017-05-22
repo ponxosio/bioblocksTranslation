@@ -70,7 +70,7 @@ IfBlockPOJO::~IfBlockPOJO() {
 
 }
 
-void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error) {
+void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr, std::shared_ptr<LogicBlocksManager> logicManager) const throw(std::runtime_error) {
     if (!branchesVector.empty()) {
         std::shared_ptr<MathematicOperable> timeVar = graphPtr->getTimeVariable();;
         std::shared_ptr<ComparisonOperable> timeCondition = BlocksUtils::makeTimeCondition(timeVar,initTime);
@@ -94,6 +94,17 @@ void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphP
         std::shared_ptr<VariableEntry> branchTrigerred = std::get<1>(*it);
 
         int setBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
+
+        int logicBlockStartId = graphPtr->getNextAvailableNodeId();
+        if (logicManager != NULL) {
+            logicManager->addIfLogicBlockStartId(logicBlockStartId);
+            logicManager->addIfBranchTriggerVar(logicBlockStartId, branchTrigerred);
+            logicManager->addIfExecutingFlagVar(logicBlockStartId, std::dynamic_pointer_cast<VariableEntry>(triggeredFlag));
+            if (branchCondition->isPhysical()) {
+                logicManager->setLogicBlockIdPhyscal(logicBlockStartId);
+            }
+        }
+
         graphPtr->startIfBlock(branchCondition);
         graphPtr->appendOperations(setBranchTrigerred);
         ++it;
@@ -101,6 +112,13 @@ void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphP
         while (it != branchesVector.end()) {
             branchCondition = std::get<0>(*it);
             branchTrigerred = std::get<1>(*it);
+
+            if (logicManager != NULL) {
+                logicManager->addIfBranchTriggerVar(logicBlockStartId, branchTrigerred);
+                if (branchCondition->isPhysical()) {
+                    logicManager->setLogicBlockIdPhyscal(logicBlockStartId);
+                }
+            }
 
             int setActualBranchTrigerred = graphPtr->emplaceAssignation(branchTrigerred->toString(), timeVar);
             graphPtr->startElIfBlock(branchCondition);
@@ -113,6 +131,11 @@ void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphP
         if (elseVar != NULL) {
             int setElseTrigerred = graphPtr->emplaceAssignation(elseVar->toString(), timeVar);
             graphPtr->appendOperations(setElseTrigerred);
+
+            if(logicManager != NULL) {
+                logicManager->addIfBranchTriggerVar(logicBlockStartId, elseVar);
+            }
+
         } else {
             int setEnfIfTime = graphPtr->emplaceAssignation(endIfVar->toString(), timeVar);
             graphPtr->appendOperations(setEnfIfTime);
@@ -120,12 +143,24 @@ void IfBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphP
             for(std::shared_ptr<VariableEntry> otherIf : otherIfEnds) {
                 int setOtherIfEndTime = graphPtr->emplaceAssignation(otherIf->toString(), timeVar);
                 graphPtr->appendOperations(setOtherIfEndTime);
+
+                if(logicManager != NULL) {
+                    logicManager->addIfEndVar(logicBlockStartId, otherIf);
+                }
             }
+        }
+
+        if(logicManager != NULL) {
+            logicManager->addIfEndVar(logicBlockStartId, endIfVar);
         }
 
         if (endWhileExecutingVar != NULL) {
             int unsetExecutingWhile = graphPtr->emplaceAssignation(endWhileExecutingVar->toString(), MF::getNum(0));
             graphPtr->appendOperations(unsetExecutingWhile);
+
+            if(logicManager != NULL) {
+                logicManager->addIfEndVar(logicBlockStartId, endWhileExecutingVar);
+            }
         }
 
         graphPtr->endIfBlock();

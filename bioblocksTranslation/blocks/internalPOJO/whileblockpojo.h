@@ -12,11 +12,11 @@
 
 #include <utils/units.h>
 
-#include "bioblocksTranslation/blocks/internalPOJO/blockpojointerface.h"
+#include "bioblocksTranslation/blocks/internalPOJO/logicblockpojointerface.h"
 #include "bioblocksTranslation/blocks/blocksutils.h"
 
 
-class WhileBlockPOJO : public BlockPOJOInterface
+class WhileBlockPOJO : public LogicBlockPOJOInterface
 {
 public:
     WhileBlockPOJO();
@@ -55,7 +55,7 @@ public:
         return endVar;
     }
 
-    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);
+    virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr, std::shared_ptr<LogicBlocksManager> logicManager) const throw(std::runtime_error);
 
 protected:
     int id;
