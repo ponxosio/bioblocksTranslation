@@ -1,7 +1,7 @@
 #include "logicblocksmanager.h"
 
 LogicBlocksManager::LogicBlocksManager() {
-
+    mainLoopId = -1;
 }
 
 LogicBlocksManager::~LogicBlocksManager() {

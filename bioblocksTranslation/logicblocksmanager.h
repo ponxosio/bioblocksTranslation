@@ -45,7 +45,17 @@ public:
 
     std::string toString() const;
 
+    inline void setMainLoopId(int mainLoopId) {
+        this->mainLoopId = mainLoopId;
+    }
+
+    inline int getMainLoopId() const {
+        return mainLoopId;
+    }
+
 protected:
+    int mainLoopId;
+
     std::unordered_set<int> logicIfBlockStartIds;
     std::unordered_set<int> logicWhileBlockStartIds;
 

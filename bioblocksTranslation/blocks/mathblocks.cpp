@@ -17,7 +17,7 @@ MathBlocks::~MathBlocks() {
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohmann::json & mathJSONObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("block_type", mathJSONObj)) {
+    if(UtilsJSON::hasProperty("block_type", mathJSONObj)) {
         std::string opStr = mathJSONObj["block_type"];
 
         std::shared_ptr<MathematicOperable> op = NULL;
@@ -53,23 +53,23 @@ std::shared_ptr<MathematicOperable> MathBlocks::translateMathBlock(const nlohman
 
         return op;
     } else {
-        throw(std::invalid_argument("MathBlocks::translateMathBlock." + BlocksUtils::generateNoPropertyErrorMsg(mathJSONObj, "block_type") ));
+        throw(std::invalid_argument("MathBlocks::translateMathBlock." + UtilsJSON::generateNoPropertyErrorMsg(mathJSONObj, "block_type") ));
     }
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathNumberOperation(const json & mathNumberObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("value", mathNumberObj)) {
+    if(UtilsJSON::hasProperty("value", mathNumberObj)) {
         std::string valueStr = mathNumberObj["value"];
         double value = std::atof(valueStr.c_str());
         return MF::getNum(value);
     } else {
-        throw(std::invalid_argument("MathBlocks::mathNumberOperation." + BlocksUtils::generateNoPropertyErrorMsg(mathNumberObj, "value")));
+        throw(std::invalid_argument("MathBlocks::mathNumberOperation." + UtilsJSON::generateNoPropertyErrorMsg(mathNumberObj, "value")));
     }
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathArithmeticOperation(const json & mathArithmeticObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, mathArithmeticObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, mathArithmeticObj);
 
         std::shared_ptr<MathematicOperable> leftPtr = translateMathBlock(mathArithmeticObj["left"]);
         std::shared_ptr<MathematicOperable> rightPtr = translateMathBlock(mathArithmeticObj["rigth"]);
@@ -82,7 +82,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathArithmeticOperation(const js
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathSingleOperation(const json & mathSingleObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"value","op"}, mathSingleObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"value","op"}, mathSingleObj);
 
         std::shared_ptr<MathematicOperable> valuePtr = translateMathBlock(mathSingleObj["value"]);
         ProtocolUnaryOperation::UnaryOperator op = getUnaryOperator(mathSingleObj["op"]);
@@ -93,12 +93,12 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathSingleOperation(const json &
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathConstantOperation(const json & constantOperationObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("constant", constantOperationObj)) {
+    if(UtilsJSON::hasProperty("constant", constantOperationObj)) {
         std::string valueStr = constantOperationObj["constant"];
         double value = getNumericConstant(valueStr);
         return MF::getNum(value);
     } else {
-        throw(std::invalid_argument("MathBlocks::mathConstantOperation." + BlocksUtils::generateNoPropertyErrorMsg(constantOperationObj, "constant")));
+        throw(std::invalid_argument("MathBlocks::mathConstantOperation." + UtilsJSON::generateNoPropertyErrorMsg(constantOperationObj, "constant")));
     }
 }
 
@@ -109,7 +109,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathOnListOperation(const json &
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathModuloOperation(const json & mathModuloObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"left","rigth"}, mathModuloObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"left","rigth"}, mathModuloObj);
 
         std::shared_ptr<MathematicOperable> leftPtr = translateMathBlock(mathModuloObj["left"]);
         std::shared_ptr<MathematicOperable> rightPtr = translateMathBlock(mathModuloObj["rigth"]);
@@ -122,7 +122,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathModuloOperation(const json &
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathConstrainOperation(const json & mathConstrainObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"value","low", "high"}, mathConstrainObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"value","low", "high"}, mathConstrainObj);
 
         std::shared_ptr<MathematicOperable> valuePtr = translateMathBlock(mathConstrainObj["value"]);
         std::shared_ptr<MathematicOperable> lowPtr = translateMathBlock(mathConstrainObj["low"]);
@@ -136,7 +136,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathConstrainOperation(const jso
 
 std::shared_ptr<MathematicOperable> MathBlocks::mathRandomIntOperation(const json & mathRandomIntObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"from","to"}, mathRandomIntObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"from","to"}, mathRandomIntObj);
 
         std::shared_ptr<MathematicOperable> fromPtr = translateMathBlock(mathRandomIntObj["from"]);
         std::shared_ptr<MathematicOperable> toPtr = translateMathBlock(mathRandomIntObj["to"]);
@@ -153,7 +153,7 @@ std::shared_ptr<MathematicOperable> MathBlocks::mathRandomFloatOperation() {
 
 std::shared_ptr<MathematicOperable> MathBlocks::logicTernaryOperation(const json & logicTernaryObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"if","then","else"}, logicTernaryObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"if","then","else"}, logicTernaryObj);
 
         std::shared_ptr<ComparisonOperable> conditionPtr = logicTrans->translateLogicBlock(logicTernaryObj["if"]);
         std::shared_ptr<MathematicOperable> truePtr = translateMathBlock(logicTernaryObj["then"]);
@@ -166,11 +166,11 @@ std::shared_ptr<MathematicOperable> MathBlocks::logicTernaryOperation(const json
 }
 
 std::shared_ptr<MathematicOperable> MathBlocks::variableGetOperation(const nlohmann::json & variableGetObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("variable", variableGetObj)) {
+    if(UtilsJSON::hasProperty("variable", variableGetObj)) {
         std::string valueStr = variableGetObj["variable"];
         return protocolPtr->getVariable(valueStr);
     } else {
-        throw(std::invalid_argument("MathBlocks::variableGetOperation." + BlocksUtils::generateNoPropertyErrorMsg(variableGetObj, "variable")));
+        throw(std::invalid_argument("MathBlocks::variableGetOperation." + UtilsJSON::generateNoPropertyErrorMsg(variableGetObj, "variable")));
     }
 }
 

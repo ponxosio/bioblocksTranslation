@@ -18,7 +18,7 @@ OperationsBlocks::~OperationsBlocks() {
 
 std::vector<int> OperationsBlocks::processBlock(const nlohmann::json & blockObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockObj);
         std::string blockStr = blockObj["block_type"];
 
         std::vector<int> opsIds;
@@ -61,7 +61,7 @@ std::vector<int> OperationsBlocks::processBlock(const nlohmann::json & blockObj)
 
 std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipetteObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                                "pipetteTypeName",
                                                "source",
                                                "destination",
@@ -125,7 +125,7 @@ std::vector<int> OperationsBlocks::pipetteOperation(const nlohmann::json & pipet
 
 std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json & continuousflowObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"source",
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"source",
                                                                     "rate",
                                                                     "rate_volume_units",
                                                                     "rate_time_units"}, continuousflowObj);
@@ -135,8 +135,8 @@ std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json 
         std::vector<std::string> containersSequence = vcManager->processContainerBlock(continuousflowObj["source"]);
 
         std::shared_ptr<MathematicOperable> rateValue = mathBlocks->translateMathBlock(continuousflowObj["rate"]);
-        units::Volume rateVolumeUnits = BlocksUtils::getVolumeUnits(continuousflowObj["rate_volume_units"]);
-        units::Time rateTimeUnits = BlocksUtils::getTimeUnits(continuousflowObj["rate_time_units"]);
+        units::Volume rateVolumeUnits = UtilsJSON::getVolumeUnits(continuousflowObj["rate_volume_units"]);
+        units::Time rateTimeUnits = UtilsJSON::getTimeUnits(continuousflowObj["rate_time_units"]);
 
         if (containersSequence.size() > 1) {
             auto it = containersSequence.begin();
@@ -149,7 +149,7 @@ std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json 
                 first = next;
             }
         } else {
-            throw(std::invalid_argument("container sequence list is not at least of size 2 in json " + BlocksUtils::jsonObjToStr(continuousflowObj)));
+            throw(std::invalid_argument("container sequence list is not at least of size 2 in json " + UtilsJSON::jsonObjToStr(continuousflowObj)));
         }
 
         return opsIds;
@@ -160,7 +160,7 @@ std::vector<int> OperationsBlocks::continuousflowOperation(const nlohmann::json 
 
 int OperationsBlocks::electrophoresisOperation(const nlohmann::json & electrophoresisObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                   "source",
                                   "ladder",
                                   "field_strength",
@@ -171,8 +171,8 @@ int OperationsBlocks::electrophoresisOperation(const nlohmann::json & electropho
         std::string sourceContainer = vcManager->processContainerBlock(electrophoresisObj["source"])[0];
         std::shared_ptr<MathematicOperable> fieldStrength = mathBlocks->translateMathBlock(electrophoresisObj["field_strength"]);
 
-        units::ElectricField fieldUnits = BlocksUtils::getElectricPotentialUnits(electrophoresisObj["field_strength_units_v"]) /
-                                            BlocksUtils::getLengthUnits(electrophoresisObj["field_strength_units_l"]);
+        units::ElectricField fieldUnits = UtilsJSON::getElectricPotentialUnits(electrophoresisObj["field_strength_units_v"]) /
+                                            UtilsJSON::getLengthUnits(electrophoresisObj["field_strength_units_l"]);
 
         std::shared_ptr<VariableEntry> variableEntry =
                 std::dynamic_pointer_cast<VariableEntry>(mathBlocks->translateMathBlock(electrophoresisObj["data_reference"]));
@@ -185,7 +185,7 @@ int OperationsBlocks::electrophoresisOperation(const nlohmann::json & electropho
 
 std::vector<int> OperationsBlocks::incubateOperation(const nlohmann::json & incubateObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                   "source",
                                   "temperature",
                                   "temperature_units",
@@ -196,10 +196,10 @@ std::vector<int> OperationsBlocks::incubateOperation(const nlohmann::json & incu
         std::string sourceContainer = vcManager->processContainerBlock(incubateObj["source"])[0];
 
         std::shared_ptr<MathematicOperable> shakingSpeed = mathBlocks->translateMathBlock(incubateObj["shaking_speed"]);
-        units::Frequency shakingSpeedUnits = BlocksUtils::getFrequencyUnits(incubateObj["shaking_speed_units"]);
+        units::Frequency shakingSpeedUnits = UtilsJSON::getFrequencyUnits(incubateObj["shaking_speed_units"]);
 
         std::shared_ptr<MathematicOperable> temperature = mathBlocks->translateMathBlock(incubateObj["temperature"]);
-        units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(incubateObj["temperature_units"]);
+        units::Temperature temperatureUnits = UtilsJSON::getTemperatureUnits(incubateObj["temperature_units"]);
 
         int heatOp = graphPtr->emplaceApplyTemperature(sourceContainer, temperature, temperatureUnits);
         int stirOp = graphPtr->emplaceShake(sourceContainer, shakingSpeed, shakingSpeedUnits);
@@ -212,7 +212,7 @@ std::vector<int> OperationsBlocks::incubateOperation(const nlohmann::json & incu
 
 std::vector<int> OperationsBlocks::centrifugationOperation(const nlohmann::json & centrifugationObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                   "source",
                                   "speed",
                                   "speed_units",
@@ -222,10 +222,10 @@ std::vector<int> OperationsBlocks::centrifugationOperation(const nlohmann::json 
         std::string sourceContainer = vcManager->processContainerBlock(centrifugationObj["source"])[0];
 
         std::shared_ptr<MathematicOperable> speed = mathBlocks->translateMathBlock(centrifugationObj["speed"]);
-        units::Frequency speedUnits = BlocksUtils::getFrequencyUnits(centrifugationObj["speed_units"]);
+        units::Frequency speedUnits = UtilsJSON::getFrequencyUnits(centrifugationObj["speed_units"]);
 
         std::shared_ptr<MathematicOperable> temperature = mathBlocks->translateMathBlock(centrifugationObj["temperature"]);
-        units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(centrifugationObj["temperature_units"]);
+        units::Temperature temperatureUnits = UtilsJSON::getTemperatureUnits(centrifugationObj["temperature_units"]);
 
         int heatOp = graphPtr->emplaceApplyTemperature(sourceContainer, temperature, temperatureUnits);
         int centrifugateOp = graphPtr->emplaceCentrifugate(sourceContainer, speed, speedUnits);
@@ -238,7 +238,7 @@ std::vector<int> OperationsBlocks::centrifugationOperation(const nlohmann::json 
 
 int OperationsBlocks::measurementOperation(const nlohmann::json & measurementObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                   "source",
                                   "measurement_type",
                                   "measurement_frequency",
@@ -248,7 +248,7 @@ int OperationsBlocks::measurementOperation(const nlohmann::json & measurementObj
         std::string sourceContainer = vcManager->processContainerBlock(measurementObj["source"])[0];
 
         std::shared_ptr<MathematicOperable> measureFrequency = mathBlocks->translateMathBlock(measurementObj["measurement_frequency"]);
-        units::Frequency measureUnits = BlocksUtils::getFrequencyUnits(measurementObj["unit_frequency"]);
+        units::Frequency measureUnits = UtilsJSON::getFrequencyUnits(measurementObj["unit_frequency"]);
 
         std::shared_ptr<VariableEntry> dataReference = std::dynamic_pointer_cast<VariableEntry>
                                                         (mathBlocks->translateMathBlock(measurementObj["data_reference"]));
@@ -258,16 +258,16 @@ int OperationsBlocks::measurementOperation(const nlohmann::json & measurementObj
         int measureType = std::stoi(typeStr);
         switch (measureType) {
         case 1: { //absorbance
-            BlocksUtils::checkPropertiesExists(std::vector<std::string>{"wavelengthnum","wavelengthnum_units"}, measurementObj);
+            UtilsJSON::checkPropertiesExists(std::vector<std::string>{"wavelengthnum","wavelengthnum_units"}, measurementObj);
 
             std::shared_ptr<MathematicOperable> waveLength = mathBlocks->translateMathBlock(measurementObj["wavelengthnum"]);
-            units::Length waveLengthUnits = BlocksUtils::getLengthUnits(measurementObj["wavelengthnum_units"]);
+            units::Length waveLengthUnits = UtilsJSON::getLengthUnits(measurementObj["wavelengthnum_units"]);
 
             opId = graphPtr->emplaceMeasureOD(sourceContainer, dataReference->toString(),
                                               measureFrequency, measureUnits, waveLength, waveLengthUnits);
             break;
         } case 2: {//fluorescence
-            BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+            UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                       "excitation",
                                       "excitation_units",
                                       "emission",
@@ -275,10 +275,10 @@ int OperationsBlocks::measurementOperation(const nlohmann::json & measurementObj
                                   }, measurementObj);
 
             std::shared_ptr<MathematicOperable> excitation = mathBlocks->translateMathBlock(measurementObj["excitation"]);
-            units::Length excitationUnits = BlocksUtils::getLengthUnits(measurementObj["excitation_units"]);
+            units::Length excitationUnits = UtilsJSON::getLengthUnits(measurementObj["excitation_units"]);
 
             std::shared_ptr<MathematicOperable> emission = mathBlocks->translateMathBlock(measurementObj["emission"]);
-            units::Length emissionUnits = BlocksUtils::getLengthUnits(measurementObj["emission_units"]);
+            units::Length emissionUnits = UtilsJSON::getLengthUnits(measurementObj["emission_units"]);
 
             opId = graphPtr->emplaceMeasureFluorescence(sourceContainer, dataReference->toString(),
                                               measureFrequency, measureUnits, excitation, excitationUnits, emission, emissionUnits);
@@ -329,7 +329,7 @@ int OperationsBlocks::flashFreezeOperation(const nlohmann::json & flashFreezeObj
 
 int OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                   "source",
                                   "mix_speed",
                                   "mix_speed_units",
@@ -338,7 +338,7 @@ int OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(st
         std::string sourceContainer = vcManager->processContainerBlock(mixObj["source"])[0];
 
         std::shared_ptr<MathematicOperable> speed = mathBlocks->translateMathBlock(mixObj["mix_speed"]);
-        units::Frequency speedUnits = BlocksUtils::getFrequencyUnits(mixObj["mix_speed_units"]);
+        units::Frequency speedUnits = UtilsJSON::getFrequencyUnits(mixObj["mix_speed_units"]);
 
         int opId = -1;
         std::string mixStr = mixObj["type"];

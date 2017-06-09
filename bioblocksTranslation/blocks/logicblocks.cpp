@@ -17,7 +17,7 @@ LogicBlocks::~LogicBlocks() {
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::translateLogicBlock(const nlohmann::json & logicJSONObj)  throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("block_type", logicJSONObj)) {
+    if(UtilsJSON::hasProperty("block_type", logicJSONObj)) {
         std::shared_ptr<ComparisonOperable> translatedBlock = NULL;
 
         std::string opStr = logicJSONObj["block_type"];
@@ -39,13 +39,13 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::translateLogicBlock(const nlohm
         return translatedBlock;
     } else {
         throw(std::invalid_argument("LogicBlocks::translateLogicBlock. " +
-                                    BlocksUtils::generateNoPropertyErrorMsg(logicJSONObj,"block_type")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(logicJSONObj,"block_type")));
     }
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicCompareOperation(const nlohmann::json & logicCompareObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, logicCompareObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, logicCompareObj);
 
         std::shared_ptr<MathematicOperable> leftPtr = mathTrans->translateMathBlock(logicCompareObj["left"]);
         std::shared_ptr<MathematicOperable> rightPtr = mathTrans->translateMathBlock(logicCompareObj["rigth"]);
@@ -59,7 +59,7 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::logicCompareOperation(const nlo
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicOperationOperation(const nlohmann::json & logicOperationObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, logicOperationObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"left","rigth","op"}, logicOperationObj);
 
         std::shared_ptr<ComparisonOperable> leftPtr = translateLogicBlock(logicOperationObj["left"]);
         std::shared_ptr<ComparisonOperable> rightPtr = translateLogicBlock(logicOperationObj["rigth"]);
@@ -72,22 +72,22 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::logicOperationOperation(const n
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicNegateOperation(const nlohmann::json & logicNegateObj) throw(std::invalid_argument) {
-    if (BlocksUtils::hasProperty("bool", logicNegateObj)) {
+    if (UtilsJSON::hasProperty("bool", logicNegateObj)) {
         std::shared_ptr<ComparisonOperable> boolPtr(translateLogicBlock(logicNegateObj["bool"])->clone());
         boolPtr->negate();
         return boolPtr;
     } else {
         throw(std::invalid_argument("LogicBlocks::logicNegateOperation." +
-                                    BlocksUtils::generateNoPropertyErrorMsg(logicNegateObj, "bool")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(logicNegateObj, "bool")));
     }
 }
 
 std::shared_ptr<ComparisonOperable> LogicBlocks::logicBooleanOperation(const nlohmann::json & logicBooleanObj) throw(std::invalid_argument) {
-    if (BlocksUtils::hasProperty("value", logicBooleanObj)) {
+    if (UtilsJSON::hasProperty("value", logicBooleanObj)) {
         return getBoolConstant(logicBooleanObj["value"]);
     } else {
         throw(std::invalid_argument("LogicBlocks::logicBooleanOperation." +
-                                    BlocksUtils::generateNoPropertyErrorMsg(logicBooleanObj, "value")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(logicBooleanObj, "value")));
     }
 }
 
@@ -99,7 +99,7 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::mathNumberPropertyOperation(con
     throw(std::invalid_argument)
 {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"op","value"}, mathNumberPropertyObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"op","value"}, mathNumberPropertyObj);
 
         std::shared_ptr<ComparisonOperable> cop = NULL;
 
@@ -118,7 +118,7 @@ std::shared_ptr<ComparisonOperable> LogicBlocks::mathNumberPropertyOperation(con
 
         } else if (opStr.compare(BLOCKLY_DIVISIBLE_BY_STR) == 0) {
 
-            BlocksUtils::checkPropertiesExists(std::vector<std::string>{"divisor"}, mathNumberPropertyObj);
+            UtilsJSON::checkPropertiesExists(std::vector<std::string>{"divisor"}, mathNumberPropertyObj);
 
             std::shared_ptr<MathematicOperable> divisorPtr = mathTrans->translateMathBlock(mathNumberPropertyObj["divisor"]);
             std::shared_ptr<MathematicOperable> modulePtr = MF::module(valuePtr, divisorPtr);

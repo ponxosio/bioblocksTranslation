@@ -58,6 +58,8 @@
 #include <protocolGraph/operables/mathematics/protocolmathf.h>
 #include <protocolGraph/ProtocolGraph.h>
 
+#include <utils/utilsjson.h>
+
 #include "bioblocksTranslation/blocks/blocksutils.h"
 
 class LogicBlocks;

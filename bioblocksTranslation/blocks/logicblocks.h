@@ -44,6 +44,8 @@
 #include <protocolGraph/operables/comparison/protocolboolf.h>
 #include <protocolGraph/operables/mathematics/protocolmathf.h>
 
+#include <utils/utilsjson.h>
+
 #include "bioblocksTranslation/blocks/blocksutils.h"
 
 class MathBlocks;

@@ -22,7 +22,7 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(std::shared_pt
     try {
         in >> js;
 
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"tittle", "linkedBlocks"}, js);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"tittle", "linkedBlocks"}, js);
 
         std::string protocolName = js["tittle"];
         resetAttributes(protocolName);
@@ -61,7 +61,9 @@ void BioBlocksTranslator::makeProtocolGraph(std::shared_ptr<LogicBlocksManager> 
 
     processLoadContainers();
 
+    int mainLoopId = ptrGraph->getNextAvailableNodeId();
     ptrGraph->startLoopBlock(BF::lessEq(ptrGraph->getTimeVariable(),MF::add(protocolEndTime, timeSlice)));
+    logicBlocskManager->setMainLoopId(mainLoopId);
 
     for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : freelogicOps) {
         std::shared_ptr<LogicBlockPOJOInterface> cast = std::dynamic_pointer_cast<LogicBlockPOJOInterface>(logicBlock);
@@ -138,7 +140,7 @@ void BioBlocksTranslator::processBlock(
     throw(std::invalid_argument)
 {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockOp);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"block_type"}, blockOp);
         std::string blockType = blockOp["block_type"];
 
         if (blockType.compare(BIOBLOCKS_IF_STR) == 0) {
@@ -171,7 +173,7 @@ void BioBlocksTranslator::thermocyclingOperation(
         BlocksUtils::fillTimeSetting(thermocyclingObj, initTimeValue, duration);
 
         std::shared_ptr<MathematicOperable> initTimeVar = initTime != NULL ? initTime : processIniTime(initTimeValue);
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"cycles", "source"}, thermocyclingObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"cycles", "source"}, thermocyclingObj);
         std::string sourceName = blocksTrans.getVCManager()->processContainerBlock(thermocyclingObj["source"])[0];
 
         //make while
@@ -276,7 +278,7 @@ void BioBlocksTranslator::variablesSet(
 
         BlocksUtils::fillTimeSetting(variableSetObj, initTimeValue, duration);
 
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"variable", "value"}, variableSetObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"variable", "value"}, variableSetObj);
 
         std::string varName = variableSetObj["variable"];
         std::shared_ptr<MathematicOperable> varValue = blocksTrans.getMathBlocks()->translateMathBlock(variableSetObj["value"]);
@@ -311,7 +313,7 @@ void BioBlocksTranslator::bioblocksIfOperation(
         units::Time duration;
 
         BlocksUtils::fillTimeSetting(bioblocksIfObj, initTimeValue, duration);
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"branches", "numberOfBranches"}, bioblocksIfObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"branches", "numberOfBranches"}, bioblocksIfObj);
 
         json branches = bioblocksIfObj["branches"];
         json::iterator it = branches.begin();
@@ -327,7 +329,7 @@ void BioBlocksTranslator::bioblocksIfOperation(
             initializeVarToZero(triggerIfName);
 
             std::shared_ptr<VariableEntry> elseVar = NULL;
-            if(BlocksUtils::hasProperty("else", bioblocksIfObj)) {
+            if(UtilsJSON::hasProperty("else", bioblocksIfObj)) {
                 std::string elseTriggerName = BlocksUtils::generateElseIfVar(id);
                 initializeVarToInfinite(elseTriggerName);
                 elseVar = ptrGraph->getVariable(elseTriggerName);
@@ -348,7 +350,7 @@ void BioBlocksTranslator::bioblocksIfOperation(
             AutoEnumerate branchSerial;
             for(;it != branches.end(); ++it) {
                 json branchJson = *it;
-                BlocksUtils::checkPropertiesExists(std::vector<std::string>{"condition", "nestedOp"}, branchJson);
+                UtilsJSON::checkPropertiesExists(std::vector<std::string>{"condition", "nestedOp"}, branchJson);
 
                 std::shared_ptr<ComparisonOperable> condition = blocksTrans.getLogicBlocks()->translateLogicBlock(branchJson["condition"]);
 
@@ -380,7 +382,7 @@ void BioBlocksTranslator::bioblocksIfOperation(
                         processBlock(*nestedOpIt, blocksTrans, trigerredVar, tempEndWhileVar, tempEndIfVar);
                     }
                 } else {
-                    throw(std::invalid_argument("empty nestedOps " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
+                    throw(std::invalid_argument("empty nestedOps " + UtilsJSON::jsonObjToStr(bioblocksIfObj)));
                 }
             }
 
@@ -406,13 +408,13 @@ void BioBlocksTranslator::bioblocksIfOperation(
                         processBlock(*elseIt, blocksTrans, tempElseTime, tempEndWhileVar, tempElseEndVar);
                     }
                 } else {
-                    throw(std::invalid_argument("empty else " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
+                    throw(std::invalid_argument("empty else " + UtilsJSON::jsonObjToStr(bioblocksIfObj)));
                 }
             }
 
             lastBlockProcess = ifBlock;
         } else {
-            throw(std::invalid_argument("empty branches " + BlocksUtils::jsonObjToStr(bioblocksIfObj)));
+            throw(std::invalid_argument("empty branches " + UtilsJSON::jsonObjToStr(bioblocksIfObj)));
         }
     } catch (std::exception & e) {
         throw(std::invalid_argument("BioBlocksTranslator::bioblocksIfOperation. " + std::string(e.what())));
@@ -432,7 +434,7 @@ void BioBlocksTranslator::bioblocksWhileOperation(
         units::Time duration;
 
         BlocksUtils::fillTimeSetting(bioblocksWhileObj, initTimeValue, duration);
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"branches", "condition"}, bioblocksWhileObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"branches", "condition"}, bioblocksWhileObj);
 
         std::shared_ptr<MathematicOperable> initTimeVar = initTime != NULL ? initTime : processIniTime(initTimeValue);
         std::shared_ptr<ComparisonOperable> condition = blocksTrans.getLogicBlocks()->translateLogicBlock(bioblocksWhileObj["condition"]);
@@ -482,7 +484,7 @@ void BioBlocksTranslator::bioblocksWhileOperation(
             }
             lastBlockProcess = whileBlock;
         } else {
-            throw(std::invalid_argument("empty branches " + BlocksUtils::jsonObjToStr(bioblocksWhileObj)));
+            throw(std::invalid_argument("empty branches " + UtilsJSON::jsonObjToStr(bioblocksWhileObj)));
         }
     } catch (std::exception & e) {
         throw(std::invalid_argument("BioBlocksTranslator::bioblocksWhileOperation. " + std::string(e.what())));

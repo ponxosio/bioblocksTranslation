@@ -12,7 +12,7 @@ ContainerManager::~ContainerManager() {
 }
 
 std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("block_type", containerObj)) {
+    if(UtilsJSON::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         std::vector<std::string> containerList;
@@ -26,12 +26,12 @@ std::vector<std::string> ContainerManager::processContainerBlock(const nlohmann:
         return containerList;
     } else {
         throw(std::invalid_argument("ContainerManager::processContainerBlock. " +
-                                    BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(containerObj,"block_type")));
     }
 }
 
 ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("block_type", containerObj)) {
+    if(UtilsJSON::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         VolumeMap volumeList;
@@ -45,12 +45,12 @@ ContainerManager::VolumeMap  ContainerManager::extractVolume(const nlohmann::jso
         return volumeList;
     } else {
         throw(std::invalid_argument("ContainerManager::extractVolume. " +
-                                    BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(containerObj,"block_type")));
     }
 }
 
 ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & containerObj) throw(std::invalid_argument) {
-    if(BlocksUtils::hasProperty("block_type", containerObj)) {
+    if(UtilsJSON::hasProperty("block_type", containerObj)) {
         std::string contStr = containerObj["block_type"];
 
         RateMap rateList;
@@ -64,29 +64,29 @@ ContainerManager::RateMap  ContainerManager::extractRate(const nlohmann::json & 
         return rateList;
     } else {
         throw(std::invalid_argument("ContainerManager::extractRate. " +
-                                    BlocksUtils::generateNoPropertyErrorMsg(containerObj,"block_type")));
+                                    UtilsJSON::generateNoPropertyErrorMsg(containerObj,"block_type")));
     }
 }
 
 ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"steps"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"steps"}, containerObj);
         PCRStepVector steps;
 
         std::string stepsStr = containerObj["steps"];
         int stepsNum = std::stoi(stepsStr);
         for(int i = 0; i < stepsNum; i++) {
-            BlocksUtils::checkPropertiesExists(std::vector<std::string>{
+            UtilsJSON::checkPropertiesExists(std::vector<std::string>{
                                                "temperature" + std::to_string(i),
                                                "temperature_units" + std::to_string(i),
                                                "duration" + std::to_string(i),
                                                "duration_units" + std::to_string(i)}, containerObj);
 
-            units::Temperature temperatureUnits = BlocksUtils::getTemperatureUnits(containerObj["temperature_units" + std::to_string(i)]);
+            units::Temperature temperatureUnits = UtilsJSON::getTemperatureUnits(containerObj["temperature_units" + std::to_string(i)]);
             std::string tempStr = containerObj["temperature" + std::to_string(i)];
             double temperature = std::stof(tempStr);
 
-            units::Time durationUnits = BlocksUtils::getTimeUnits(containerObj["duration_units" + std::to_string(i)] );
+            units::Time durationUnits = UtilsJSON::getTimeUnits(containerObj["duration_units" + std::to_string(i)] );
             std::string durationStr =  containerObj["duration" + std::to_string(i)];
             int duration = std::stoi(durationStr);
 
@@ -101,10 +101,10 @@ ContainerManager::PCRStepVector ContainerManager::extractPCRSteps(const nlohmann
 
 std::pair<std::string, ContainerManager::VolumeTuple> ContainerManager::extractVolumeSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName", "volume","unit_volume"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerName", "volume","unit_volume"}, containerObj);
 
         std::string name = containerObj["containerName"];
-        units::Volume volumeUnits = BlocksUtils::getVolumeUnits(containerObj["unit_volume"]);
+        units::Volume volumeUnits = UtilsJSON::getVolumeUnits(containerObj["unit_volume"]);
         std::shared_ptr<MathematicOperable> volume = mathBlocks->translateMathBlock(containerObj["volume"]);
 
         return std::make_pair(name, std::make_tuple(volume, volumeUnits));
@@ -115,7 +115,7 @@ std::pair<std::string, ContainerManager::VolumeTuple> ContainerManager::extractV
 
 ContainerManager::VolumeMap ContainerManager::extractVolumeListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
         json contList = containerObj["containerList"];
 
         VolumeMap volumeMap;
@@ -133,10 +133,10 @@ ContainerManager::VolumeMap ContainerManager::extractVolumeListContainer(const n
 
 std::pair<std::string, ContainerManager::RateTuple> ContainerManager::extractRateSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName", "rate", "rate_volume_units", "rate_time_units"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerName", "rate", "rate_volume_units", "rate_time_units"}, containerObj);
 
         std::string name = containerObj["containerName"];
-        units::Volumetric_Flow rateUnits = ( BlocksUtils::getVolumeUnits(containerObj["rate_volume_units"]) / BlocksUtils::getTimeUnits(containerObj["rate_time_units"]));
+        units::Volumetric_Flow rateUnits = ( UtilsJSON::getVolumeUnits(containerObj["rate_volume_units"]) / UtilsJSON::getTimeUnits(containerObj["rate_time_units"]));
         std::shared_ptr<MathematicOperable> rate = mathBlocks->translateMathBlock(containerObj["rate"]);
 
         return std::make_pair(name, std::make_tuple(rate, rateUnits));
@@ -147,7 +147,7 @@ std::pair<std::string, ContainerManager::RateTuple> ContainerManager::extractRat
 
 ContainerManager::RateMap ContainerManager::extractRateListContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
         json contList = containerObj["containerList"];
 
         RateMap rateMap;
@@ -165,7 +165,7 @@ ContainerManager::RateMap ContainerManager::extractRateListContainer(const nlohm
 
 std::string ContainerManager::processSingleContainer(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerName","type","destiny"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerName","type","destiny"}, containerObj);
 
         std::string name = containerObj["containerName"];
         if (!protocolPtr->hasVContainer(name)) {
@@ -174,10 +174,10 @@ std::string ContainerManager::processSingleContainer(const nlohmann::json & cont
 
             units::Volume initialVolume = -1 * units::ml;
             if (std::get<1>(typeTuple) == VirtualContainer::tube) {
-                BlocksUtils::checkPropertiesExists(std::vector<std::string>{"initialVolume","initialVolumeUnits"}, containerObj);
+                UtilsJSON::checkPropertiesExists(std::vector<std::string>{"initialVolume","initialVolumeUnits"}, containerObj);
 
                 std::string initialVolStr = containerObj["initialVolume"];
-                initialVolume = std::stod(initialVolStr) * BlocksUtils::getVolumeUnits(containerObj["initialVolumeUnits"]);
+                initialVolume = std::stod(initialVolStr) * UtilsJSON::getVolumeUnits(containerObj["initialVolumeUnits"]);
             }
             protocolPtr->addVContainer(name, std::get<1>(typeTuple),std::get<0>(typeTuple),initialVolume, store);
         }
@@ -189,7 +189,7 @@ std::string ContainerManager::processSingleContainer(const nlohmann::json & cont
 
 std::vector<std::string> ContainerManager::processContainerList(const nlohmann::json & containerObj) throw(std::invalid_argument) {
     try {
-        BlocksUtils::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
+        UtilsJSON::checkPropertiesExists(std::vector<std::string>{"containerList"}, containerObj);
         json contList = containerObj["containerList"];
 
         std::vector<std::string> containerList;

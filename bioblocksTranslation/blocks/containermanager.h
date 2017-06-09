@@ -34,6 +34,7 @@
 
 //local
 #include <protocolGraph/ProtocolGraph.h>
+#include <utils/utilsjson.h>
 
 #include "bioblocksTranslation/blocks/blocksutils.h"
 #include "bioblocksTranslation/blocks/mathblocks.h"

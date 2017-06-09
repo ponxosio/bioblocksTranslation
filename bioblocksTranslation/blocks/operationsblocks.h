@@ -27,6 +27,8 @@
 #include <protocolGraph/ProtocolGraph.h>
 #include <protocolGraph/operables/mathematics/MathematicOperable.h>
 
+#include <utils/utilsjson.h>
+
 #include "bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h"
 
 #include "bioblocksTranslation/blocks/blocksutils.h"

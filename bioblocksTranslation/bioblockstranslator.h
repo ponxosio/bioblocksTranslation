@@ -21,6 +21,7 @@
 #include <protocolGraph/operables/mathematics/protocolmathf.h>
 
 #include <utils/AutoEnumerate.h>
+#include <utils/utilsjson.h>
 
 //own project
 #include "bioblocksTranslation/blocks/internalPOJO/bioblocksoppojo.h"
