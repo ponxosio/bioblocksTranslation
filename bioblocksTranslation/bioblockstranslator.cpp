@@ -63,7 +63,10 @@ void BioBlocksTranslator::makeProtocolGraph(std::shared_ptr<LogicBlocksManager> 
 
     int mainLoopId = ptrGraph->getNextAvailableNodeId();
     ptrGraph->startLoopBlock(BF::lessEq(ptrGraph->getTimeVariable(),MF::add(protocolEndTime, timeSlice)));
-    logicBlocskManager->setMainLoopId(mainLoopId);
+
+    if (logicBlocskManager != NULL) {
+        logicBlocskManager->setMainLoopId(mainLoopId);
+    }
 
     for(const std::shared_ptr<BlockPOJOInterface> & logicBlock : freelogicOps) {
         std::shared_ptr<LogicBlockPOJOInterface> cast = std::dynamic_pointer_cast<LogicBlockPOJOInterface>(logicBlock);
