@@ -113,6 +113,8 @@ void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gra
 
     graphPtr->startElseBlock();
 
+    graphPtr->startIfBlock(executingIsUnset);
+
     int setEndWhileTime = graphPtr->emplaceAssignation(endVar->toString(), timeVar);
     graphPtr->appendOperations(setEndWhileTime);
 
@@ -134,6 +136,7 @@ void WhileBlockPOJO::appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> gra
         }
     }
 
+    graphPtr->endIfBlock();
     graphPtr->endIfBlock();
     graphPtr->endIfBlock();
 }
