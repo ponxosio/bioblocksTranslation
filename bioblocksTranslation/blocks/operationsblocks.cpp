@@ -45,7 +45,7 @@ std::vector<int> OperationsBlocks::processBlock(const nlohmann::json & blockObj)
         } else if (blockStr.compare(BIOBLOCKS_FLASHFREEZE_STR) == 0) {
             opsIds.push_back(flashFreezeOperation(blockObj));
         } else if (blockStr.compare(BIOBLOCKS_MIX_STR) == 0) {
-            opsIds.push_back(mixOperation(blockObj));
+            opsIds = mixOperation(blockObj);
         } else if (blockStr.compare(BIOBLOCKS_TURBIDOSTAT_STR) == 0) {
             opsIds.push_back(turbidostatOperation(blockObj));
         } else if (blockStr.compare(BIOBLOCKS_FLOWCITOMETRY_STR) == 0) {
@@ -327,13 +327,14 @@ int OperationsBlocks::flashFreezeOperation(const nlohmann::json & flashFreezeObj
     return -1;
 }
 
-int OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument) {
+std::vector<int> OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument) {
     try {
         UtilsJSON::checkPropertiesExists(std::vector<std::string>{
-                                  "source",
-                                  "mix_speed",
-                                  "mix_speed_units",
-                                  "type"}, mixObj);
+                                             "source",
+                                             "mix_speed",
+                                             "mix_speed_units",
+                                             "type",
+                                             "heat_checbox"}, mixObj);
 
         std::string sourceContainer = vcManager->processContainerBlock(mixObj["source"])[0];
 
@@ -354,7 +355,19 @@ int OperationsBlocks::mixOperation(const nlohmann::json & mixObj) const throw(st
             throw(std::invalid_argument("Unknow mix type: " + std::to_string(mixType)));
             break;
         }
-        return opId;
+        std::vector<int> ids = {opId};
+
+        std::string heat = mixObj["heat_checbox"];
+        if (heat.compare("TRUE") == 0) {
+            UtilsJSON::checkPropertiesExists(std::vector<std::string>{"heat_units","heat"}, mixObj);
+
+            std::shared_ptr<MathematicOperable> heat = mathBlocks->translateMathBlock(mixObj["heat"]);
+            units::Temperature heatUnits = UtilsJSON::getTemperatureUnits(mixObj["heat_units"]);
+
+            int heatOp = graphPtr->emplaceApplyTemperature(sourceContainer, heat, heatUnits);
+            ids.push_back(heatOp);
+        }
+        return ids;
     } catch (std::exception & e) {
         throw(std::invalid_argument("OperationsBlocks::mixOperation. " + std::string(e.what())));
     }

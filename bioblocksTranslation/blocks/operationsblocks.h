@@ -75,7 +75,7 @@ protected:
     int colonyPickingOperation(const nlohmann::json & colonyPickingObj) const throw(std::invalid_argument);
     int cellSpreadingOperation(const nlohmann::json & cellSpreadingObj) const throw(std::invalid_argument);
     int flashFreezeOperation(const nlohmann::json & flashFreezeObj) const throw(std::invalid_argument);
-    int mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument);
+    std::vector<int> mixOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument);
     int turbidostatOperation(const nlohmann::json & turObj) const throw(std::invalid_argument);
     int flowCitometryOperation(const nlohmann::json & mixObj) const throw(std::invalid_argument);
 };
