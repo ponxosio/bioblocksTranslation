@@ -40,7 +40,8 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(std::shared_pt
             processLinkedBlocks(*it, opBlocks);
 
             if (lastBlockProcess != NULL) { //variable set can go in initialization
-                protocolEndTime = MF::max(protocolEndTime, lastBlockProcess->getEndVariable());
+                endValues.push_back(lastBlockProcess->getEndVariable());
+                //protocolEndTime = MF::max(protocolEndTime, lastBlockProcess->getEndVariable());
             }
         }
         makeProtocolGraph(logicBlocskManager);
@@ -52,6 +53,8 @@ std::shared_ptr<ProtocolGraph> BioBlocksTranslator::translateFile(std::shared_pt
 }
 
 void BioBlocksTranslator::makeProtocolGraph(std::shared_ptr<LogicBlocksManager> logicBlocskManager) {
+    protocolEndTime = MF::tryMaxNumbers(endValues);
+
     setTimeStep();
     initActualTimeVar();
 

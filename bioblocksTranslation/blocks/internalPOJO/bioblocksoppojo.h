@@ -46,7 +46,7 @@ public:
     }
 
     inline virtual std::shared_ptr<MathematicOperable> getEndVariable() const {
-        return MF::add(initTime,duration);
+        return MF::tryAddNumbers(initTime,duration);
     }
 
     virtual void appendOperationsToGraphs(std::shared_ptr<ProtocolGraph> graphPtr) const throw(std::runtime_error);

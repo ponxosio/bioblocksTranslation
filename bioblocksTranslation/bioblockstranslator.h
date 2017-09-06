@@ -63,8 +63,10 @@ protected:
 
     AutoEnumerate logicSerial;
     std::shared_ptr<BlockPOJOInterface> lastBlockProcess;
-    std::shared_ptr<MathematicOperable> protocolEndTime;
     std::shared_ptr<MathematicOperable> timeSlice;
+
+    std::vector<std::shared_ptr<MathematicOperable>> endValues;
+    std::shared_ptr<MathematicOperable> protocolEndTime;
 
     void makeProtocolGraph(std::shared_ptr<LogicBlocksManager> logicBlocskManager);
     void setTimeStep();
